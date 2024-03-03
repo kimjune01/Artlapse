@@ -19,8 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     if !UserDefaults.standard.bool(forKey: "firstlaunch") {
       UserDefaults.standard.setValue(true, forKey: "firstlaunch")
-      UserDefaults.standard.set(9, forKey: ConfigViewController.durationControlRowKey)
-      UserDefaults.standard.set(0, forKey: ConfigViewController.intervalControlRowKey)
+      UserDefaults.standard.set(9.0, forKey: ConfigViewController.durationControlRowKey)
+      UserDefaults.standard.set(1.0, forKey: ConfigViewController.intervalControlRowKey)
     }
     return true
   }

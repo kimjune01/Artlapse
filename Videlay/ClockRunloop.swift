@@ -60,6 +60,8 @@ class ClockRunloop {
         // do nothing
       }
     })
+    RunLoop.main.add(miniTimer!, forMode: .common)
+
   }
   
   func pause() {

@@ -94,9 +94,19 @@ class ClockOverlayView: UIView {
   }
   
   func animateRedCircle(duration: CGFloat) {
-    animationLength = duration
-    startDisplayLink()
-    whiteCircle.isHidden = false
+    if duration > 1 {
+      animationLength = duration
+      startDisplayLink()
+      whiteCircle.isHidden = false
+    } else {
+      redCircle.setProgress(1, animated: true)
+      DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+        guard let self = self else { return }
+        self.redCircle.setProgress(0, animated: false)
+        self.startDisplayLink()
+        self.whiteCircle.isHidden = false
+      }
+    }
   }
   
   required init?(coder: NSCoder) {

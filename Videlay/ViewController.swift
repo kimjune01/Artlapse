@@ -17,6 +17,7 @@ enum TimelapseState {
   case standby
   case activeInLoop
   case idleInLoop
+  case exporting
 }
 
 class ViewController: UIViewController {
@@ -36,12 +37,12 @@ class ViewController: UIViewController {
   var configButton: UIButton!
   var chatButton: UIButton!
   var exportButton: UIButton!
+  var flipButton: UIButton!
 
   var cycleCounter = 0
   
   var timelapseState: TimelapseState = .unknown {
     didSet {
-      print(timelapseState)
       renderTimelapseState()
     }
   }
@@ -102,6 +103,7 @@ class ViewController: UIViewController {
     addConfigButton()
     addTimerLabel()
     addExportButton()
+    addFlipButton()
   }
   
   func addChatButton() {
@@ -152,6 +154,25 @@ class ViewController: UIViewController {
     self.configButton = button
   }
   
+  func addFlipButton() {
+    var config = UIButton.Configuration.filled()
+    config.baseForegroundColor = .white
+    config.baseBackgroundColor = .black.withAlphaComponent(0.3)
+    config.cornerStyle = .large
+    config.buttonSize = .large
+    config.image = UIImage(systemName: "camera.rotate")!
+
+    let button = UIButton(configuration: config, primaryAction: UIAction() { _ in
+      self.flipCamera()
+    })
+    controlsContainer.addSubview(button)
+    button.pinLeadingToParent(margin: 12)
+    button.pinBottomToParent(margin: 20, insideSafeArea: true)
+    button.isEnabled = false
+    self.flipButton = button
+
+  }
+  
   func addClockOverlay() {
     view.addSubview(clockOverlay)
     clockOverlay.setSquare(constant: ClockOverlayView.outerDiameter)
@@ -161,12 +182,14 @@ class ViewController: UIViewController {
   }
   
   func configureRunloop() {
-    runloop.loopSeconds = Int(ConfigViewController.configuredIntervalMinutes()) * 60
+    let intervalSecs = Int(ConfigViewController.configuredIntervalSeconds())
+    let durationSecs = Int(ConfigViewController.configuredDurationSeconds())
+    runloop.loopSeconds = intervalSecs + durationSecs
     runloop.delegate = self
   }
   
   func showChatVCWithDialog() {
-    let alertController = UIAlertController(title: "Chat with the developer", message: "I would love to know about your experience with Shortn. Please help make this app better with feedback. I get notifications straight to my iPhone!", preferredStyle: .alert)
+    let alertController = UIAlertController(title: "Chat with the developer", message: "I would love to know about your experience with Artlapse. Please help make this app better with feedback. I get notifications straight to my iPhone!", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Chat", style: .default, handler: { _ in
       self.present(ChatViewController(), animated: true)
     }))
@@ -187,8 +210,8 @@ class ViewController: UIViewController {
     
     // modify .videoConfiguration, .audioConfiguration, .photoConfiguration properties
     // Compression, resolution, and maximum recording time options are available
-    NextLevel.shared.videoConfiguration.maximumCaptureDuration = CMTime(seconds: 5, preferredTimescale: 600)
     NextLevel.shared.audioConfiguration.bitRate = 44000
+    NextLevel.shared.videoStabilizationMode = .standard
   }
   
   func addTimerLabel() {
@@ -245,7 +268,6 @@ class ViewController: UIViewController {
         }
       }
     }
-
   }
   
   func requestPermissions(_ completion: @escaping (Bool) -> ()) {
@@ -282,7 +304,7 @@ class ViewController: UIViewController {
   }
   
   func renderTimelapseState() {
-    let intervalProgress: CGFloat = CGFloat(runloop.secondsRemaining) / CGFloat(ConfigViewController.configuredIntervalMinutes() * 60)
+    let intervalProgress: CGFloat = CGFloat(runloop.secondsRemaining) / CGFloat(ConfigViewController.configuredIntervalSeconds())
     
     clockOverlay.setInterval(progress: intervalProgress)
     
@@ -292,29 +314,44 @@ class ViewController: UIViewController {
       configButton.isEnabled = false
       chatButton.isEnabled = true
       exportButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 0.3
     case .standby:
       spinner.stopAnimating()
       recordButton.backgroundColor = .systemRed
       configButton.isEnabled = cycleCounter == 0
       chatButton.isEnabled = true
       exportButton.isEnabled = cycleCounter > 0
+      flipButton.isEnabled = true
+      timerLabel.alpha = 1
     case .activeInLoop:
       recordButton.backgroundColor = .systemPink.withAlphaComponent(0.5)
       configButton.isEnabled = false
       chatButton.isEnabled = false
       exportButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 1
     case .idleInLoop:
       recordButton.backgroundColor = .systemPink
       configButton.isEnabled = false
       chatButton.isEnabled = false
       exportButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 1
+    case .exporting:
+      recordButton.backgroundColor = .gray
+      configButton.isEnabled = false
+      chatButton.isEnabled = false
+      exportButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 0.3
     }
     
     exportButton.alpha = exportButton.isEnabled ? 1 : 0.3
     
-    let secondsText = String(format: "%.1f", Float(cycleCounter) * ConfigViewController.configuredDurationSeconds())
-    let minutesText = String(format: "%d", cycleCounter * Int(ConfigViewController.configuredIntervalMinutes()))
-    timerLabel.text = secondsText + "s / " + minutesText + "m"
+    let durationText = String(format: "%.1f", Float(cycleCounter) * ConfigViewController.configuredDurationSeconds())
+    let intervalText = String(format: "%d", cycleCounter * Int(ConfigViewController.configuredIntervalSeconds()))
+    timerLabel.text = durationText + "s / " + intervalText + "s"
   }
   
   @objc func pinch(_ pinch: UIPinchGestureRecognizer) {
@@ -352,24 +389,20 @@ class ViewController: UIViewController {
       runloop.stop()
       timelapseState = .standby
       UIApplication.shared.isIdleTimerDisabled = false
-
+      showPreSaveAlert()
+    case .exporting:
+      print("do nothing")
     }
   }
   
   func recordSegment() {
     cycleCounter += 1
     NextLevel.shared.record()
-    let duration = TimeInterval(ConfigViewController.configuredDurationSeconds())
-    Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] timer in
-      guard let self = self else { return }
-      NextLevel.shared.pause()
-      self.timelapseState = .idleInLoop
-    }
-    clockOverlay.animateRedCircle(duration: duration)
+    // timing done in delegate method below
   }
   
   func export() {
-    print("export")
+    timelapseState = .exporting
     guard let session = NextLevel.shared.session else { return }
     session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
       if let url = url {
@@ -385,7 +418,13 @@ class ViewController: UIViewController {
       } else if let _ = error {
         self.showExportAlert()
       }
+      self.timelapseState = .standby
+
     })
+  }
+  
+  func flipCamera() {
+    NextLevel.shared.flipCaptureDevicePosition()
   }
   
   func saveVideoToAlbum(_ outputURL: URL, _ completion: @escaping (Error?) -> ()) {
@@ -416,6 +455,15 @@ class ViewController: UIViewController {
     alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { action in
       self.reset()
     }))
+    present(alertController, animated: true)
+  }
+  
+  func showPreSaveAlert() {
+    let alertController = UIAlertController(title: "Save video?", message: "You can either save the video now or record more.", preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
+    alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
+      self.export()
+    })
     present(alertController, animated: true)
   }
   
@@ -536,11 +584,16 @@ extension ViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelV
   }
   
   func nextLevel(_ nextLevel: NextLevel, didStartClipInSession session: NextLevelSession) {
-    
+    let duration = TimeInterval(ConfigViewController.configuredDurationSeconds())
+    Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
+      NextLevel.shared.pause()
+      self.timelapseState = .idleInLoop
+    }
+    clockOverlay.animateRedCircle(duration: duration)
   }
   
   func nextLevel(_ nextLevel: NextLevel, didCompleteClip clip: NextLevelClip, inSession session: NextLevelSession) {
-    
+
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendVideoSampleBuffer sampleBuffer: CMSampleBuffer, inSession session: NextLevelSession) {
@@ -552,7 +605,6 @@ extension ViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelV
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendVideoPixelBuffer pixelBuffer: CVPixelBuffer, timestamp: TimeInterval, inSession session: NextLevelSession) {
-    
   }
   
   func nextLevel(_ nextLevel: NextLevel, didSkipVideoPixelBuffer pixelBuffer: CVPixelBuffer, timestamp: TimeInterval, inSession session: NextLevelSession) {
@@ -591,7 +643,7 @@ extension ViewController: ClockRunloopDelegate {
 
 extension ViewController: ConfigViewControllerDelegate {
   func configVCDidChangeConfig() {
-    runloop.loopSeconds = Int(ConfigViewController.configuredIntervalMinutes()) * 60
+    configureRunloop()
     renderTimelapseState()
   }
 }
