@@ -227,7 +227,7 @@ class ViewController: UIViewController {
     var exportConfig = UIButton.Configuration.plain()
     exportConfig.image = UIImage(named: "photos-app-icon")
     exportButton = UIButton(configuration: exportConfig, primaryAction: UIAction() { _ in
-      self.export()
+      self.gotoPreview()
     })
     view.addSubview(exportButton)
     exportButton.pinBottomToParent(margin: 8, insideSafeArea: true)
@@ -401,45 +401,32 @@ class ViewController: UIViewController {
     // timing done in delegate method below
   }
   
-  func export() {
-    timelapseState = .exporting
-    guard let session = NextLevel.shared.session else { return }
-    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
-      if let url = url {
-        self.saveVideoToAlbum(url) { [weak self] err in
-          guard let self = self else { return }
-          guard err == nil else {
-            self.showExportAlert()
-            return
-          }
-          self.showPostSaveAlert()
-        }
-        self.reset()
-      } else if let _ = error {
-        self.showExportAlert()
-      }
-      self.timelapseState = .standby
-
-    })
+  func gotoPreview() {
+//    timelapseState = .exporting
+//    guard let session = NextLevel.shared.session else { return }
+//    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
+//      if let url = url {
+//        self.saveVideoToAlbum(url) { [weak self] err in
+//          guard let self = self else { return }
+//          guard err == nil else {
+//            self.showExportAlert()
+//            return
+//          }
+//          self.showPostSaveAlert()
+//        }
+//        self.reset()
+//      } else if let _ = error {
+//        self.showExportAlert()
+//      }
+//      self.timelapseState = .standby
+//
+//    })
   }
   
   func flipCamera() {
     NextLevel.shared.flipCaptureDevicePosition()
   }
   
-  func saveVideoToAlbum(_ outputURL: URL, _ completion: @escaping (Error?) -> ()) {
-    PHPhotoLibrary.shared().performChanges({
-      let request = PHAssetCreationRequest.forAsset()
-      request.addResource(with: .video, fileURL: outputURL, options: nil)
-    }) { (result, error) in
-      DispatchQueue.main.async {
-        if let error = error {
-          print(error.localizedDescription)
-        }
-        completion(error)
-      }
-    }
-  }
   
   func reset() {
     cycleCounter = 0
@@ -450,28 +437,15 @@ class ViewController: UIViewController {
     }
   }
 
-  func showExportAlert() {
-    let alertController = UIAlertController(title: "Export failed", message: "I'm not quite sure why but it didn't work for some reason. Maybe you can tell me in the chat?", preferredStyle: .alert)
-    alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { action in
-      self.reset()
-    }))
-    present(alertController, animated: true)
-  }
-  
   func showPreSaveAlert() {
     let alertController = UIAlertController(title: "Save video?", message: "You can either save the video now or record more.", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
     alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
-      self.export()
+      self.gotoPreview()
     })
     present(alertController, animated: true)
   }
   
-  func showPostSaveAlert() {
-    let alertController = UIAlertController(title: "Video saved", message: "Go to your photos app to watch the video", preferredStyle: .alert)
-    alertController.addAction(UIAlertAction(title: "OK", style: .cancel))
-    present(alertController, animated: true)
-  }
 }
 
 extension ViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelVideoDelegate {

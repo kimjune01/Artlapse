@@ -18,4 +18,15 @@ extension UIViewController {
       alert.dismiss(animated: true)
     }
   }
+  
+  func alert(_ error: Error) {
+    alert(error.localizedDescription)
+  }
+  
+  func alert(_ message: String) {
+    let alertController = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+    present(alertController, animated: true, completion: nil)
+  }
+
 }

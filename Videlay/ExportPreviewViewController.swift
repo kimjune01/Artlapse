@@ -11,6 +11,7 @@ import MobileCoreServices
 import Photos
 import Player
 import Social
+import NextLevel
 
 enum ExportPreviewViewControllerState {
   case initial
@@ -26,14 +27,13 @@ protocol ExportPreviewViewControllerDelegate: AnyObject {
 class ExportPreviewViewController: UIViewController {
   weak var delegate: ExportPreviewViewControllerDelegate?
   var state: ExportPreviewViewControllerState = .initial
-  let sequence: Sequence
-  var exporter: SequenceExporter?
+  let nlSession: NextLevelSession
   let player = Player()
   let actionButton = UIButton()
   let backButton = UIButton.backButton()
   
-  init(sequence: Sequence) {
-    self.sequence = sequence
+  init(nlSession: NextLevelSession) {
+    self.nlSession = nlSession
     super.init(nibName: nil, bundle: nil)
   }
   
@@ -45,22 +45,55 @@ class ExportPreviewViewController: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = .black
     addPlayer()
-    startExporter()
+    export()
     addActionButton()
     addBackButton()
   }
   
-  func startExporter() {
-    exporter = SequenceExporter(sequence: sequence)
-    exporter!.export { [unowned self] maybeUrl, error in
-      guard error == nil, let url = maybeUrl else {
-        self.alert(error!)
-        return
+  func export() {
+    nlSession.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
+      if let url = url {
+        self.saveVideoToAlbum(url) { [weak self] err in
+          guard let self = self else { return }
+          guard err == nil else {
+            self.showExportAlert()
+            return
+          }
+          self.showPostSaveAlert()
+        }
+//        self.reset()
+      } else if let _ = error {
+        self.showExportAlert()
       }
-      self.player.url = url
-      self.player.playFromBeginning()
-      self.state = .playing
+    })
+  }
+  
+  func saveVideoToAlbum(_ outputURL: URL, _ completion: @escaping (Error?) -> ()) {
+    PHPhotoLibrary.shared().performChanges({
+      let request = PHAssetCreationRequest.forAsset()
+      request.addResource(with: .video, fileURL: outputURL, options: nil)
+    }) { (result, error) in
+      DispatchQueue.main.async {
+        if let error = error {
+          print(error.localizedDescription)
+        }
+        completion(error)
+      }
     }
+  }
+  
+  func showExportAlert() {
+    let alertController = UIAlertController(title: "Export failed", message: "I'm not quite sure why but it didn't work for some reason. Maybe you can tell me in the chat?", preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { action in
+//      self.reset()
+    }))
+    present(alertController, animated: true)
+  }
+  
+  func showPostSaveAlert() {
+    let alertController = UIAlertController(title: "Video saved", message: "Go to your photos app to watch the video", preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "OK", style: .cancel))
+    present(alertController, animated: true)
   }
   
   func addPlayer() {
