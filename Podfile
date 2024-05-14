@@ -9,6 +9,5 @@ target 'Videlay' do
 pod "NextLevel"
 pod "Player"
 pod 'Crisp'
-pod 'CircleProgressView', '~> 1.0'
 
 end

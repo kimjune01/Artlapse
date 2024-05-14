@@ -39,8 +39,6 @@ class ExportPreviewViewController: UIViewController {
     preparePreview()
 //    export()
     addActionButton()
-    addBackButton()
-    
   }
   
   func preparePreview() {
@@ -121,15 +119,6 @@ class ExportPreviewViewController: UIViewController {
     actionButton.roundCorner(radius: 8)
     actionButton.setImage(UIImage(named: "photos-app-icon"), for: .normal)
     actionButton.addTarget(self, action: #selector(tappedSaveButton), for: .touchUpInside)
-  }
-  
-  func addBackButton() {
-    view.addSubview(backButton)
-    backButton.set(width: 60)
-    backButton.set(height: 36)
-    backButton.pinLeadingToParent()
-    backButton.pinTopToParent(margin: 8, insideSafeArea: true)
-    backButton.addTarget(self, action: #selector(tappedBackButton), for: .touchUpInside)
   }
   
   @objc func tappedPlayer() {

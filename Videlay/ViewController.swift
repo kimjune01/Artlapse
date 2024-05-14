@@ -17,15 +17,10 @@ enum TimelapseState {
   case standby
   case activeInLoop
   case idleInLoop
-}
-
-protocol RecordingViewControllerDelegate: AnyObject {
-  func gotoPreview()
+  case exporting
 }
 
 class RecordingViewController: UIViewController {
-  
-  var delegate: RecordingViewControllerDelegate?
   
   let spinner = UIActivityIndicatorView(style: .large)
   var previewView = UIView()
@@ -232,7 +227,7 @@ class RecordingViewController: UIViewController {
     var previewConfig = UIButton.Configuration.plain()
     previewConfig.image = UIImage(named: "play.fill")
     previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
-      self.delegate?.gotoPreview()
+      self.gotoPreview()
     })
     view.addSubview(previewButton)
     previewButton.pinBottomToParent(margin: 8, insideSafeArea: true)
@@ -311,6 +306,8 @@ class RecordingViewController: UIViewController {
   func renderTimelapseState() {
     let intervalProgress: CGFloat = CGFloat(runloop.secondsRemaining) / CGFloat(ConfigViewController.configuredIntervalSeconds())
     
+    clockOverlay.setInterval(progress: intervalProgress)
+    
     switch timelapseState {
     case .unknown:
       recordButton.backgroundColor = .gray
@@ -341,6 +338,13 @@ class RecordingViewController: UIViewController {
       previewButton.isEnabled = false
       flipButton.isEnabled = false
       timerLabel.alpha = 1
+    case .exporting:
+      recordButton.backgroundColor = .gray
+      configButton.isEnabled = false
+      chatButton.isEnabled = false
+      previewButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 0.3
     }
     
     previewButton.alpha = previewButton.isEnabled ? 1 : 0.3
@@ -384,6 +388,10 @@ class RecordingViewController: UIViewController {
     case .idleInLoop:
       runloop.stop()
       timelapseState = .standby
+      UIApplication.shared.isIdleTimerDisabled = false
+      showPreSaveAlert()
+    case .exporting:
+      print("do nothing")
     }
   }
   
@@ -391,6 +399,28 @@ class RecordingViewController: UIViewController {
     cycleCounter += 1
     NextLevel.shared.record()
     // timing done in delegate method below
+  }
+  
+  func gotoPreview() {
+//    timelapseState = .exporting
+//    guard let session = NextLevel.shared.session else { return }
+//    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
+//      if let url = url {
+//        self.saveVideoToAlbum(url) { [weak self] err in
+//          guard let self = self else { return }
+//          guard err == nil else {
+//            self.showExportAlert()
+//            return
+//          }
+//          self.showPostSaveAlert()
+//        }
+//        self.reset()
+//      } else if let _ = error {
+//        self.showExportAlert()
+//      }
+//      self.timelapseState = .standby
+//
+//    })
   }
   
   func flipCamera() {
@@ -411,7 +441,7 @@ class RecordingViewController: UIViewController {
     let alertController = UIAlertController(title: "Save video?", message: "You can either save the video now or record more.", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
     alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
-      self.delegate?.gotoPreview()
+      self.gotoPreview()
     })
     present(alertController, animated: true)
   }
@@ -529,13 +559,11 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   
   func nextLevel(_ nextLevel: NextLevel, didStartClipInSession session: NextLevelSession) {
     let duration = TimeInterval(ConfigViewController.configuredDurationSeconds())
-    clockOverlay.animateRedCircle(duration: duration)
     Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
       NextLevel.shared.pause()
       self.timelapseState = .idleInLoop
-      let intervalSeconds = CGFloat(ConfigViewController.configuredIntervalSeconds())
-      self.clockOverlay.animateWhiteCircle(duration: intervalSeconds)
     }
+    clockOverlay.animateRedCircle(duration: duration)
   }
   
   func nextLevel(_ nextLevel: NextLevel, didCompleteClip clip: NextLevelClip, inSession session: NextLevelSession) {
