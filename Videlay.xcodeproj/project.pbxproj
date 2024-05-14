@@ -34,6 +34,7 @@
 		0EC019F428EA5EBB000DD2C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F228EA5EBB000DD2C1 /* Main.storyboard */; };
 		0EC019F628EA5EBD000DD2C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F528EA5EBD000DD2C1 /* Assets.xcassets */; };
 		0EC019F928EA5EBD000DD2C1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F728EA5EBD000DD2C1 /* LaunchScreen.storyboard */; };
+		0ED7299A2BF4192100AA6908 /* ConfigInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED729992BF4192100AA6908 /* ConfigInfoView.swift */; };
 		0EEADD8F28F3BE5A004F7BE5 /* RecordButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADD8E28F3BE5A004F7BE5 /* RecordButton.swift */; };
 		0EEADD9128F3C137004F7BE5 /* ConfigViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EEADD9028F3C137004F7BE5 /* ConfigViewController.swift */; };
 		8DBB279447B18270A2CF32AC /* Pods_Videlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 506CCCAD2F619D55BDD7161E /* Pods_Videlay.framework */; };
@@ -69,6 +70,7 @@
 		0EC019F528EA5EBD000DD2C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0EC019F828EA5EBD000DD2C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0EC019FA28EA5EBD000DD2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0ED729992BF4192100AA6908 /* ConfigInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigInfoView.swift; sourceTree = "<group>"; };
 		0EEADD8E28F3BE5A004F7BE5 /* RecordButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordButton.swift; sourceTree = "<group>"; };
 		0EEADD9028F3C137004F7BE5 /* ConfigViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigViewController.swift; sourceTree = "<group>"; };
 		34C00BA345336B34FEC7A538 /* Pods-Videlay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Videlay.debug.xcconfig"; path = "Target Support Files/Pods-Videlay/Pods-Videlay.debug.xcconfig"; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				0E61C1372BF40AAB00140AAB /* CircleView.swift */,
+				0ED729992BF4192100AA6908 /* ConfigInfoView.swift */,
 				0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */,
 			);
 			path = "Accessory views";
@@ -310,6 +313,7 @@
 				0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */,
 				0EB4B25D28F3BD700036CFFF /* UIButton+.swift in Sources */,
 				0EB4B26628F3BD700036CFFF /* UIView+.swift in Sources */,
+				0ED7299A2BF4192100AA6908 /* ConfigInfoView.swift in Sources */,
 				0EB4B25F28F3BD700036CFFF /* TimeInterval+.swift in Sources */,
 				0EB4B26328F3BD700036CFFF /* String+.swift in Sources */,
 				0EB4B26428F3BD700036CFFF /* UIFont+.swift in Sources */,

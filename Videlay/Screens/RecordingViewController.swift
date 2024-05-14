@@ -43,6 +43,8 @@ class RecordingViewController: UIViewController {
   var chatButton: UIButton!
   var previewButton: UIButton!
   var flipButton: UIButton!
+  
+  let configInfoVC = ConfigInfoViewController()
 
   var cycleCounter = 0
   
@@ -61,6 +63,7 @@ class RecordingViewController: UIViewController {
     configureCaptureSession()
     addButtons()
     addClockOverlay()
+    addConfigInfoView()
     addSpinner()
   }
 
@@ -186,6 +189,17 @@ class RecordingViewController: UIViewController {
     clockOverlay.isUserInteractionEnabled = false
   }
   
+  func addConfigInfoView() {
+    view.addSubview(configInfoVC.view)
+    configInfoVC.view.isUserInteractionEnabled = false
+    configInfoVC.view.pinLeadingToParent(margin: 8)
+    configInfoVC.view.pinTop(toBottomOf: configButton, margin: 8)
+    configInfoVC.view.set(width: 300)
+    configInfoVC.view.set(height: 100)
+    addChild(configInfoVC)
+    configInfoVC.didMove(toParent: self)
+  }
+  
   func configureRunloop() {
     let intervalSecs = Int(ConfigViewController.configuredIntervalSeconds())
     let durationSecs = Int(ConfigViewController.configuredDurationSeconds())
@@ -309,8 +323,6 @@ class RecordingViewController: UIViewController {
   }
   
   func renderTimelapseState() {
-    let intervalProgress: CGFloat = CGFloat(runloop.secondsRemaining) / CGFloat(ConfigViewController.configuredIntervalSeconds())
-    
     switch timelapseState {
     case .unknown:
       recordButton.backgroundColor = .gray
@@ -383,6 +395,7 @@ class RecordingViewController: UIViewController {
       print("do nothing")
     case .idleInLoop:
       runloop.stop()
+      clockOverlay.cancelAnimations()
       timelapseState = .standby
     }
   }
@@ -573,7 +586,6 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
     
   }
   
-  
 }
 
 extension RecordingViewController: ClockRunloopDelegate {
@@ -591,5 +603,6 @@ extension RecordingViewController: ConfigViewControllerDelegate {
   func configVCDidChangeConfig() {
     configureRunloop()
     renderTimelapseState()
+    configInfoVC.refresh()
   }
 }

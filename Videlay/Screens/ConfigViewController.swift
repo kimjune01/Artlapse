@@ -133,8 +133,16 @@ class ConfigViewController: UIViewController {
     return UserDefaults.standard.float(forKey: ConfigViewController.durationControlRowKey)
   }
   
+  static func configuredDurationText() -> String {
+    return String(format: "%.1f", configuredDurationSeconds())
+  }
+  
   static func configuredIntervalSeconds() -> Float {
     return UserDefaults.standard.float(forKey: ConfigViewController.intervalControlRowKey)
+  }
+  
+  static func configuredIntervalText() -> String {
+    return String(format: "%d", Int(configuredIntervalSeconds()))
   }
   
   func setDuration(_ number: Float) {

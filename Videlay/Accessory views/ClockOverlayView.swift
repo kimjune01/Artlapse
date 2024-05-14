@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CircleProgressView
 
 // shows a percentage of a stroked circle
 class ClockOverlayView: UIView {
