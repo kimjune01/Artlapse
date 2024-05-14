@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */; };
+		0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */; };
 		0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */; };
 		0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24928F3BD700036CFFF /* UUID+.swift */; };
 		0EB4B25A28F3BD700036CFFF /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24A28F3BD700036CFFF /* Date+.swift */; };
@@ -28,7 +29,7 @@
 		0EBFA9E428F3E612007625B4 /* ClockRunloop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */; };
 		0EC019ED28EA5EBB000DD2C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */; };
 		0EC019EF28EA5EBB000DD2C1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */; };
-		0EC019F128EA5EBB000DD2C1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019F028EA5EBB000DD2C1 /* ViewController.swift */; };
+		0EC019F128EA5EBB000DD2C1 /* RecordingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019F028EA5EBB000DD2C1 /* RecordingViewController.swift */; };
 		0EC019F428EA5EBB000DD2C1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F228EA5EBB000DD2C1 /* Main.storyboard */; };
 		0EC019F628EA5EBD000DD2C1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F528EA5EBD000DD2C1 /* Assets.xcassets */; };
 		0EC019F928EA5EBD000DD2C1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0EC019F728EA5EBD000DD2C1 /* LaunchScreen.storyboard */; };
@@ -39,6 +40,7 @@
 
 /* Begin PBXFileReference section */
 		0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExportPreviewViewController.swift; sourceTree = "<group>"; };
+		0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIScrollView+.swift"; sourceTree = "<group>"; };
 		0EB4B24928F3BD700036CFFF /* UUID+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
 		0EB4B24A28F3BD700036CFFF /* Date+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+.swift"; sourceTree = "<group>"; };
@@ -60,7 +62,7 @@
 		0EC019E928EA5EBB000DD2C1 /* Videlay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Videlay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		0EC019F028EA5EBB000DD2C1 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0EC019F028EA5EBB000DD2C1 /* RecordingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewController.swift; sourceTree = "<group>"; };
 		0EC019F328EA5EBB000DD2C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0EC019F528EA5EBD000DD2C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0EC019F828EA5EBD000DD2C1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -90,6 +92,16 @@
 				506CCCAD2F619D55BDD7161E /* Pods_Videlay.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0E61C1352BF4018700140AAB /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */,
+				0EC019F028EA5EBB000DD2C1 /* RecordingViewController.swift */,
+				0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */,
+			);
+			path = Screens;
 			sourceTree = "<group>";
 		};
 		0EB4B24728F3BD6A0036CFFF /* Extensions */ = {
@@ -138,11 +150,10 @@
 			children = (
 				0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */,
 				0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */,
-				0EC019F028EA5EBB000DD2C1 /* ViewController.swift */,
+				0E61C1352BF4018700140AAB /* Screens */,
 				0EEADD9028F3C137004F7BE5 /* ConfigViewController.swift */,
 				0EEADD8E28F3BE5A004F7BE5 /* RecordButton.swift */,
 				0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */,
-				0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */,
 				0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */,
 				0EB4B24728F3BD6A0036CFFF /* Extensions */,
 				0EC019F228EA5EBB000DD2C1 /* Main.storyboard */,
@@ -279,7 +290,7 @@
 			files = (
 				0EBFA9E228F3E50D007625B4 /* ClockOverlayView.swift in Sources */,
 				0EBFA9E428F3E612007625B4 /* ClockRunloop.swift in Sources */,
-				0EC019F128EA5EBB000DD2C1 /* ViewController.swift in Sources */,
+				0EC019F128EA5EBB000DD2C1 /* RecordingViewController.swift in Sources */,
 				0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */,
 				0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */,
 				0EB4B26028F3BD700036CFFF /* FileManager+.swift in Sources */,
@@ -294,6 +305,7 @@
 				0EEADD9128F3C137004F7BE5 /* ConfigViewController.swift in Sources */,
 				0EB4B26228F3BD700036CFFF /* CGAffineTransform+.swift in Sources */,
 				0EB4B25E28F3BD700036CFFF /* Duration+.swift in Sources */,
+				0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */,
 				0EB4B25B28F3BD700036CFFF /* UILabel+.swift in Sources */,
 				0EB4B26528F3BD700036CFFF /* AVAsset+.swift in Sources */,
 				0EB4B26128F3BD700036CFFF /* UIImage+.swift in Sources */,

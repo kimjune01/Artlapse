@@ -17,10 +17,15 @@ enum TimelapseState {
   case standby
   case activeInLoop
   case idleInLoop
-  case exporting
 }
 
-class ViewController: UIViewController {
+protocol RecordingViewControllerDelegate: AnyObject {
+  func gotoPreview()
+}
+
+class RecordingViewController: UIViewController {
+  
+  var delegate: RecordingViewControllerDelegate?
   
   let spinner = UIActivityIndicatorView(style: .large)
   var previewView = UIView()
@@ -36,7 +41,7 @@ class ViewController: UIViewController {
   
   var configButton: UIButton!
   var chatButton: UIButton!
-  var exportButton: UIButton!
+  var previewButton: UIButton!
   var flipButton: UIButton!
 
   var cycleCounter = 0
@@ -224,16 +229,16 @@ class ViewController: UIViewController {
   }
   
   func addExportButton() {
-    var exportConfig = UIButton.Configuration.plain()
-    exportConfig.image = UIImage(named: "photos-app-icon")
-    exportButton = UIButton(configuration: exportConfig, primaryAction: UIAction() { _ in
-      self.gotoPreview()
+    var previewConfig = UIButton.Configuration.plain()
+    previewConfig.image = UIImage(named: "play.fill")
+    previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
+      self.delegate?.gotoPreview()
     })
-    view.addSubview(exportButton)
-    exportButton.pinBottomToParent(margin: 8, insideSafeArea: true)
-    exportButton.pinTrailingToParent(margin: 8)
-    exportButton.setImageScale(to: 0.8)
-    exportButton.alpha = 0.3
+    view.addSubview(previewButton)
+    previewButton.pinBottomToParent(margin: 8, insideSafeArea: true)
+    previewButton.pinTrailingToParent(margin: 8)
+    previewButton.setImageScale(to: 0.8)
+    previewButton.alpha = 0.3
   }
   
   func tryStartingRecordingSession() {
@@ -313,7 +318,7 @@ class ViewController: UIViewController {
       recordButton.backgroundColor = .gray
       configButton.isEnabled = false
       chatButton.isEnabled = true
-      exportButton.isEnabled = false
+      previewButton.isEnabled = false
       flipButton.isEnabled = false
       timerLabel.alpha = 0.3
     case .standby:
@@ -321,33 +326,26 @@ class ViewController: UIViewController {
       recordButton.backgroundColor = .systemRed
       configButton.isEnabled = cycleCounter == 0
       chatButton.isEnabled = true
-      exportButton.isEnabled = cycleCounter > 0
+      previewButton.isEnabled = cycleCounter > 0
       flipButton.isEnabled = true
       timerLabel.alpha = 1
     case .activeInLoop:
       recordButton.backgroundColor = .systemPink.withAlphaComponent(0.5)
       configButton.isEnabled = false
       chatButton.isEnabled = false
-      exportButton.isEnabled = false
+      previewButton.isEnabled = false
       flipButton.isEnabled = false
       timerLabel.alpha = 1
     case .idleInLoop:
       recordButton.backgroundColor = .systemPink
       configButton.isEnabled = false
       chatButton.isEnabled = false
-      exportButton.isEnabled = false
+      previewButton.isEnabled = false
       flipButton.isEnabled = false
       timerLabel.alpha = 1
-    case .exporting:
-      recordButton.backgroundColor = .gray
-      configButton.isEnabled = false
-      chatButton.isEnabled = false
-      exportButton.isEnabled = false
-      flipButton.isEnabled = false
-      timerLabel.alpha = 0.3
     }
     
-    exportButton.alpha = exportButton.isEnabled ? 1 : 0.3
+    previewButton.alpha = previewButton.isEnabled ? 1 : 0.3
     
     let durationText = String(format: "%.1f", Float(cycleCounter) * ConfigViewController.configuredDurationSeconds())
     let intervalText = String(format: "%d", cycleCounter * Int(ConfigViewController.configuredIntervalSeconds()))
@@ -390,8 +388,6 @@ class ViewController: UIViewController {
       timelapseState = .standby
       UIApplication.shared.isIdleTimerDisabled = false
       showPreSaveAlert()
-    case .exporting:
-      print("do nothing")
     }
   }
   
@@ -399,28 +395,6 @@ class ViewController: UIViewController {
     cycleCounter += 1
     NextLevel.shared.record()
     // timing done in delegate method below
-  }
-  
-  func gotoPreview() {
-//    timelapseState = .exporting
-//    guard let session = NextLevel.shared.session else { return }
-//    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
-//      if let url = url {
-//        self.saveVideoToAlbum(url) { [weak self] err in
-//          guard let self = self else { return }
-//          guard err == nil else {
-//            self.showExportAlert()
-//            return
-//          }
-//          self.showPostSaveAlert()
-//        }
-//        self.reset()
-//      } else if let _ = error {
-//        self.showExportAlert()
-//      }
-//      self.timelapseState = .standby
-//
-//    })
   }
   
   func flipCamera() {
@@ -441,14 +415,14 @@ class ViewController: UIViewController {
     let alertController = UIAlertController(title: "Save video?", message: "You can either save the video now or record more.", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
     alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
-      self.gotoPreview()
+      self.delegate?.gotoPreview()
     })
     present(alertController, animated: true)
   }
   
 }
 
-extension ViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelVideoDelegate {
+extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelVideoDelegate {
   func nextLevel(_ nextLevel: NextLevel, didUpdateVideoConfiguration videoConfiguration: NextLevelVideoConfiguration) {
     
   }
@@ -604,7 +578,7 @@ extension ViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelV
   
 }
 
-extension ViewController: ClockRunloopDelegate {
+extension RecordingViewController: ClockRunloopDelegate {
   func clockDidCycleLoop() {
     timelapseState = .activeInLoop
     recordSegment()
@@ -615,7 +589,7 @@ extension ViewController: ClockRunloopDelegate {
   }
 }
 
-extension ViewController: ConfigViewControllerDelegate {
+extension RecordingViewController: ConfigViewControllerDelegate {
   func configVCDidChangeConfig() {
     configureRunloop()
     renderTimelapseState()

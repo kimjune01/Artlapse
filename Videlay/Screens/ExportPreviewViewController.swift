@@ -27,45 +27,49 @@ protocol ExportPreviewViewControllerDelegate: AnyObject {
 class ExportPreviewViewController: UIViewController {
   weak var delegate: ExportPreviewViewControllerDelegate?
   var state: ExportPreviewViewControllerState = .initial
-  let nlSession: NextLevelSession
   let player = Player()
   let actionButton = UIButton()
   let backButton = UIButton.backButton()
+  var assetUrl: URL?
   
-  init(nlSession: NextLevelSession) {
-    self.nlSession = nlSession
-    super.init(nibName: nil, bundle: nil)
-  }
-  
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .black
     addPlayer()
-    export()
+    preparePreview()
+//    export()
     addActionButton()
     addBackButton()
+    
   }
   
-  func export() {
-    nlSession.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
+  func preparePreview() {
+    guard let session = NextLevel.shared.session else {
+      return
+    }
+    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
       if let url = url {
-        self.saveVideoToAlbum(url) { [weak self] err in
-          guard let self = self else { return }
-          guard err == nil else {
-            self.showExportAlert()
-            return
-          }
-          self.showPostSaveAlert()
-        }
-//        self.reset()
+        self.assetUrl = url
+        self.player.url = url
       } else if let _ = error {
         self.showExportAlert()
       }
     })
+  }
+  
+  func export() {
+    guard let url = assetUrl else {
+      assert(false)
+      return
+    }
+    saveVideoToAlbum(url) { [weak self] err in
+      guard let self = self else { return }
+      guard err == nil else {
+        self.showExportAlert()
+        return
+      }
+      self.showPostSaveAlert()
+    }
   }
   
   func saveVideoToAlbum(_ outputURL: URL, _ completion: @escaping (Error?) -> ()) {
@@ -115,7 +119,7 @@ class ExportPreviewViewController: UIViewController {
     actionButton.tintColor = .white
     actionButton.backgroundColor = .systemBlue
     actionButton.roundCorner(radius: 8)
-    actionButton.setTitle("Save", for: .normal)
+    actionButton.setImage(UIImage(named: "photos-app-icon"), for: .normal)
     actionButton.addTarget(self, action: #selector(tappedSaveButton), for: .touchUpInside)
   }
   
