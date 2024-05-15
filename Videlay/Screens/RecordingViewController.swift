@@ -80,7 +80,6 @@ class RecordingViewController: UIViewController {
   
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    NextLevel.shared.stop()
   }
   
   func setupCameraPreview() {
@@ -243,16 +242,21 @@ class RecordingViewController: UIViewController {
   }
   
   func addExportButton() {
-    var previewConfig = UIButton.Configuration.plain()
-    previewConfig.image = UIImage(named: "play.fill")
+    var previewConfig = UIButton.Configuration.filled()
+    previewConfig.baseForegroundColor = .white
+    previewConfig.baseBackgroundColor = .black.withAlphaComponent(0.3)
+    previewConfig.cornerStyle = .large
+    previewConfig.buttonSize = .large
+    previewConfig.image = UIImage(systemName: "play.rectangle.fill")
+
     previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
       self.delegate?.gotoPreview()
     })
-    view.addSubview(previewButton)
-    previewButton.pinBottomToParent(margin: 8, insideSafeArea: true)
-    previewButton.pinTrailingToParent(margin: 8)
-    previewButton.setImageScale(to: 0.8)
+    controlsContainer.addSubview(previewButton)
+    previewButton.pinTrailingToParent(margin: 12)
+    previewButton.pinBottomToParent(margin: 20, insideSafeArea: true)
     previewButton.alpha = 0.3
+    
   }
   
   func tryStartingRecordingSession() {
@@ -359,7 +363,7 @@ class RecordingViewController: UIViewController {
     
     let durationText = String(format: "%.1f", Float(cycleCounter) * ConfigViewController.configuredDurationSeconds())
     let intervalText = String(format: "%d", cycleCounter * Int(ConfigViewController.configuredIntervalSeconds()))
-    timerLabel.text = durationText + "s / " + intervalText + "s"
+    timerLabel.text = "Video length: " + durationText + "s"
   }
   
   @objc func pinch(_ pinch: UIPinchGestureRecognizer) {
@@ -415,6 +419,7 @@ class RecordingViewController: UIViewController {
     cycleCounter = 0
     runloop.stop()
     timelapseState = .standby
+    configInfoVC.refresh()
     if let session = NextLevel.shared.session {
       session.removeAllClips()
     }

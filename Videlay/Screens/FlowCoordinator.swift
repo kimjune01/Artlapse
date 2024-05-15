@@ -33,7 +33,17 @@ extension FlowCoordinator: RecordingViewControllerDelegate {
   
   func gotoPreview() {
     let exportPreviewVC = ExportPreviewViewController()
+    exportPreviewVC.delegate = self
     navController.pushViewController(exportPreviewVC, animated: true)
 
+  }
+}
+
+extension FlowCoordinator: ExportPreviewViewControllerDelegate {
+  func exportPreviewVCDidFinish(_ previewVC: ExportPreviewViewController) {
+    navController.popToRootViewController(animated: true)
+    if let recVC = navController.topViewController as? RecordingViewController {
+      recVC.reset()
+    }
   }
 }

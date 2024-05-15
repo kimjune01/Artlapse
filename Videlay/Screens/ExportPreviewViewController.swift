@@ -31,42 +31,52 @@ class ExportPreviewViewController: UIViewController {
   let actionButton = UIButton()
   let backButton = UIButton.backButton()
   var assetUrl: URL?
+  var playbackCounter = 0
+  let backgroundPlaceholder = UIImageView()
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .black
+    view.backgroundColor = .darkGray
     addPlayer()
     preparePreview()
-//    export()
+    addBackgroundPlaceholder()
     addActionButton()
   }
   
   func preparePreview() {
-    guard let session = NextLevel.shared.session else {
+    playerPlaybackDidEnd(player)
+  }
+  
+  func addBackgroundPlaceholder() {
+    guard let session = NextLevel.shared.session,
+          let firstClip = session.clips.first else {
       return
     }
-    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality, completionHandler: { (url: URL?, error: Error?) in
-      if let url = url {
-        self.assetUrl = url
-        self.player.url = url
-      } else if let _ = error {
-        self.showExportAlert()
-      }
-    })
+    
+    backgroundPlaceholder.image = firstClip.lastFrameImage
+    view.insertSubview(backgroundPlaceholder, belowSubview: player.view)
+    backgroundPlaceholder.frame = player.view.frame
+    backgroundPlaceholder.contentMode = .scaleAspectFit
   }
   
   func export() {
-    guard let url = assetUrl else {
+    guard let session = NextLevel.shared.session else {
       assert(false)
       return
     }
-    saveVideoToAlbum(url) { [weak self] err in
-      guard let self = self else { return }
-      guard err == nil else {
-        self.showExportAlert()
+    session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality) { url, err in
+      guard let url = url, err == nil else {
+        self.showExportFailAlert()
         return
       }
-      self.showPostSaveAlert()
+      self.saveVideoToAlbum(url) { [weak self] err in
+        guard let self = self else { return }
+        guard err == nil else {
+          self.showExportFailAlert()
+          return
+        }
+        self.showPostSaveAlert()
+      }
     }
   }
   
@@ -84,7 +94,7 @@ class ExportPreviewViewController: UIViewController {
     }
   }
   
-  func showExportAlert() {
+  func showExportFailAlert() {
     let alertController = UIAlertController(title: "Export failed", message: "I'm not quite sure why but it didn't work for some reason. Maybe you can tell me in the chat?", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { action in
 //      self.reset()
@@ -101,21 +111,19 @@ class ExportPreviewViewController: UIViewController {
   func addPlayer() {
     player.playbackPausesWhenBackgrounded = true
     player.playbackPausesWhenResigningActive = true
-    player.playbackFreezesAtEnd = false
-    player.playbackLoops = true
+    player.playbackFreezesAtEnd = true
     player.view.frame = view.bounds
-    player.view.backgroundColor = .lightGray
     view.addSubview(player.view)
     let playerTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tappedPlayer))
     player.view.addGestureRecognizer(playerTapRecognizer)
-
+    player.playbackDelegate = self
   }
   
   func addActionButton() {
     view.addSubview(actionButton)
-    actionButton.fillBottomOfParent(height: UIButton.actionButtonHeight, insideSafeArea: true)
+    actionButton.centerXInParent()
+    actionButton.pinBottomToParent(margin: 12, insideSafeArea: true)
     actionButton.tintColor = .white
-    actionButton.backgroundColor = .systemBlue
     actionButton.roundCorner(radius: 8)
     actionButton.setImage(UIImage(named: "photos-app-icon"), for: .normal)
     actionButton.addTarget(self, action: #selector(tappedSaveButton), for: .touchUpInside)
@@ -183,15 +191,26 @@ class ExportPreviewViewController: UIViewController {
       alert("Exported file missing.")
       return
     }
-    requestPhotoLibraryAuthorization {
-      self.saveVideoToPhotosAlbum(url) { saved in
-        if saved {
-          self.showSavedSuccessAlert()
-        } else {
-          self.showNotSavedAlert()
+    showSaveWillEndSessionAlert(accept: {
+      self.requestPhotoLibraryAuthorization {
+        self.saveVideoToPhotosAlbum(url) { saved in
+          if saved {
+            self.showSavedSuccessAlert()
+          } else {
+            self.showNotSavedAlert()
+          }
         }
       }
-    }
+    })
+  }
+  
+  func showSaveWillEndSessionAlert(accept: @escaping () -> ()) {
+    let alertController = UIAlertController(title: "Save video?", message: "If you save the video now, you will not be able to append more clips to this video. You will start a new session.", preferredStyle: .alert)
+    alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
+    alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
+      accept()
+    })
+    present(alertController, animated: true)
   }
   
   func showSavedSuccessAlert() {
@@ -238,4 +257,39 @@ class ExportPreviewViewController: UIViewController {
     present(shareSheet, animated: true, completion: nil)
   }
 
+}
+
+extension ExportPreviewViewController: PlayerPlaybackDelegate {
+  func playerCurrentTimeDidChange(_ player: Player) {
+    
+  }
+  
+  func playerPlaybackWillStartFromBeginning(_ player: Player) {
+    
+  }
+  
+  func playerPlaybackWillLoop(_ player: Player) {
+    
+  }
+  
+  func playerPlaybackDidLoop(_ player: Player) {
+    
+  }
+  
+  func playerPlaybackDidEnd(_ player: Player) {
+    guard let session = NextLevel.shared.session else {
+      return
+    }
+    let clipsCount = session.clips.count
+    guard clipsCount > 0 else { return }
+    let nextClip = session.clips[playbackCounter % clipsCount]
+    guard let url = nextClip.url else {
+      return
+    }
+    player.url = url
+    backgroundPlaceholder.image = nextClip.lastFrameImage
+
+    player.playFromBeginning()
+    playbackCounter += 1
+  }
 }

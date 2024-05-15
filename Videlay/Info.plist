@@ -4,6 +4,8 @@
 <dict>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Artlapse needs access to save your video to your photo album.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
