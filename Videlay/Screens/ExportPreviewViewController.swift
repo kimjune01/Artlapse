@@ -64,18 +64,24 @@ class ExportPreviewViewController: UIViewController {
       assert(false)
       return
     }
+    
+    actionButton.isEnabled = false
+
     session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality) { url, err in
       guard let url = url, err == nil else {
         self.showExportFailAlert()
+        self.actionButton.isEnabled = true
         return
       }
-      self.saveVideoToAlbum(url) { [weak self] err in
-        guard let self = self else { return }
-        guard err == nil else {
-          self.showExportFailAlert()
-          return
+      self.saveVideoToPhotosAlbum(url) { saved in
+        DispatchQueue.main.async {
+          if saved {
+            self.showSavedSuccessAlert()
+          } else {
+            self.showNotSavedAlert()
+          }
+          self.actionButton.isEnabled = true
         }
-        self.showPostSaveAlert()
       }
     }
   }
@@ -187,19 +193,9 @@ class ExportPreviewViewController: UIViewController {
   }
   
   @objc func tappedSaveButton() {
-    guard let url = player.url else {
-      alert("Exported file missing.")
-      return
-    }
     showSaveWillEndSessionAlert(accept: {
       self.requestPhotoLibraryAuthorization {
-        self.saveVideoToPhotosAlbum(url) { saved in
-          if saved {
-            self.showSavedSuccessAlert()
-          } else {
-            self.showNotSavedAlert()
-          }
-        }
+        self.export()
       }
     })
   }

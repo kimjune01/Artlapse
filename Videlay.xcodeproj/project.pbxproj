@@ -10,6 +10,10 @@
 		0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */; };
 		0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */; };
 		0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1372BF40AAB00140AAB /* CircleView.swift */; };
+		0E8686432BF5184500557C65 /* bip.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0E8686422BF5184500557C65 /* bip.wav */; };
+		0E8686452BF5185200557C65 /* boop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0E8686442BF5185200557C65 /* boop.wav */; };
+		0E8686472BF5187900557C65 /* BipBoopPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8686462BF5187900557C65 /* BipBoopPlayer.swift */; };
+		0E8686492BF51D5F00557C65 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8686482BF51D5F00557C65 /* Defaults.swift */; };
 		0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */; };
 		0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24928F3BD700036CFFF /* UUID+.swift */; };
 		0EB4B25A28F3BD700036CFFF /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24A28F3BD700036CFFF /* Date+.swift */; };
@@ -44,6 +48,10 @@
 		0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExportPreviewViewController.swift; sourceTree = "<group>"; };
 		0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		0E61C1372BF40AAB00140AAB /* CircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
+		0E8686422BF5184500557C65 /* bip.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bip.wav; sourceTree = "<group>"; };
+		0E8686442BF5185200557C65 /* boop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = boop.wav; sourceTree = "<group>"; };
+		0E8686462BF5187900557C65 /* BipBoopPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BipBoopPlayer.swift; sourceTree = "<group>"; };
+		0E8686482BF51D5F00557C65 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIScrollView+.swift"; sourceTree = "<group>"; };
 		0EB4B24928F3BD700036CFFF /* UUID+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
 		0EB4B24A28F3BD700036CFFF /* Date+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date+.swift"; sourceTree = "<group>"; };
@@ -112,11 +120,22 @@
 		0E61C1362BF40A8F00140AAB /* Accessory views */ = {
 			isa = PBXGroup;
 			children = (
+				0EEADD8E28F3BE5A004F7BE5 /* RecordButton.swift */,
 				0E61C1372BF40AAB00140AAB /* CircleView.swift */,
 				0ED729992BF4192100AA6908 /* ConfigInfoView.swift */,
 				0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */,
 			);
 			path = "Accessory views";
+			sourceTree = "<group>";
+		};
+		0E8686412BF5183A00557C65 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				0E8686462BF5187900557C65 /* BipBoopPlayer.swift */,
+				0E8686442BF5185200557C65 /* boop.wav */,
+				0E8686422BF5184500557C65 /* bip.wav */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		0EB4B24728F3BD6A0036CFFF /* Extensions */ = {
@@ -165,9 +184,10 @@
 			children = (
 				0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */,
 				0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */,
+				0E8686482BF51D5F00557C65 /* Defaults.swift */,
+				0E8686412BF5183A00557C65 /* Sounds */,
 				0E61C1352BF4018700140AAB /* Screens */,
 				0E61C1362BF40A8F00140AAB /* Accessory views */,
-				0EEADD8E28F3BE5A004F7BE5 /* RecordButton.swift */,
 				0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */,
 				0EB4B24728F3BD6A0036CFFF /* Extensions */,
 				0EC019F228EA5EBB000DD2C1 /* Main.storyboard */,
@@ -247,6 +267,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E8686452BF5185200557C65 /* boop.wav in Resources */,
+				0E8686432BF5184500557C65 /* bip.wav in Resources */,
 				0EC019F928EA5EBD000DD2C1 /* LaunchScreen.storyboard in Resources */,
 				0EC019F628EA5EBD000DD2C1 /* Assets.xcassets in Resources */,
 				0EC019F428EA5EBB000DD2C1 /* Main.storyboard in Resources */,
@@ -308,6 +330,7 @@
 				0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */,
 				0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */,
 				0EB4B26028F3BD700036CFFF /* FileManager+.swift in Sources */,
+				0E8686472BF5187900557C65 /* BipBoopPlayer.swift in Sources */,
 				0EEADD8F28F3BE5A004F7BE5 /* RecordButton.swift in Sources */,
 				0EB4B25A28F3BD700036CFFF /* Date+.swift in Sources */,
 				0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */,
@@ -327,6 +350,7 @@
 				0EB4B26128F3BD700036CFFF /* UIImage+.swift in Sources */,
 				0EC019ED28EA5EBB000DD2C1 /* AppDelegate.swift in Sources */,
 				0EC019EF28EA5EBB000DD2C1 /* SceneDelegate.swift in Sources */,
+				0E8686492BF51D5F00557C65 /* Defaults.swift in Sources */,
 				0EB4B26728F3BD700036CFFF /* UIViewController+.swift in Sources */,
 				0EB4B25C28F3BD700036CFFF /* UIStackView+.swift in Sources */,
 			);

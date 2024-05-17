@@ -200,8 +200,8 @@ class RecordingViewController: UIViewController {
   }
   
   func configureRunloop() {
-    let intervalSecs = Int(ConfigViewController.configuredIntervalSeconds())
-    let durationSecs = Int(ConfigViewController.configuredDurationSeconds())
+    let intervalSecs = Int(Defaults.intervalControl)
+    let durationSecs = Int(Defaults.durationControl)
     runloop.loopSeconds = intervalSecs + durationSecs
     runloop.delegate = self
   }
@@ -230,6 +230,7 @@ class RecordingViewController: UIViewController {
     // Compression, resolution, and maximum recording time options are available
     NextLevel.shared.audioConfiguration.bitRate = 44000
     NextLevel.shared.videoStabilizationMode = .standard
+    NextLevel.shared.disableAudioInputDevice()
   }
   
   func addTimerLabel() {
@@ -361,8 +362,7 @@ class RecordingViewController: UIViewController {
     
     previewButton.alpha = previewButton.isEnabled ? 1 : 0.3
     
-    let durationText = String(format: "%.1f", Float(cycleCounter) * ConfigViewController.configuredDurationSeconds())
-    let intervalText = String(format: "%d", cycleCounter * Int(ConfigViewController.configuredIntervalSeconds()))
+    let durationText = String(format: "%.1f", Float(cycleCounter) * Defaults.durationControl)
     timerLabel.text = "Video length: " + durationText + "s"
   }
   
@@ -399,6 +399,7 @@ class RecordingViewController: UIViewController {
       print("do nothing")
     case .idleInLoop:
       runloop.stop()
+      BipBoopPlayer.stopCountdown()
       clockOverlay.cancelAnimations()
       timelapseState = .standby
     }
@@ -546,12 +547,12 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   }
   
   func nextLevel(_ nextLevel: NextLevel, didStartClipInSession session: NextLevelSession) {
-    let duration = TimeInterval(ConfigViewController.configuredDurationSeconds())
+    let duration = TimeInterval(Defaults.durationControl)
     clockOverlay.animateRedCircle(duration: duration)
     Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
       NextLevel.shared.pause()
       self.timelapseState = .idleInLoop
-      let intervalSeconds = CGFloat(ConfigViewController.configuredIntervalSeconds())
+      let intervalSeconds = CGFloat(Defaults.intervalControl)
       self.clockOverlay.animateWhiteCircle(duration: intervalSeconds)
     }
   }
@@ -601,6 +602,9 @@ extension RecordingViewController: ClockRunloopDelegate {
   
   func clockDidProgressLoop() {
     renderTimelapseState()
+    if runloop.secondsRemaining == 3 {
+//      BipBoopPlayer.startCountdown()
+    }
   }
 }
 

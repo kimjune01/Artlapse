@@ -18,15 +18,12 @@ enum ConfigType: Int {
 
 class ConfigViewController: UIViewController {
   
-  // Floats represent seconds
-  static let durationControlRowKey = "durationControlRowKey"
-  static let intervalControlRowKey = "intervalControlRowKey"
-
   let durationControlTag = 0
   let intervalControlTag = 1
   
   var durationControl: UITextField!
   var intervalControl: UITextField!
+  var soundSwitch: UISwitch!
 
   weak var delegate: ConfigViewControllerDelegate?
 
@@ -85,7 +82,7 @@ class ConfigViewController: UIViewController {
     durationControl.set(width: 100)
     durationControl.set(height: 65)
     durationControl.keyboardType = .decimalPad
-    durationControl.text = String(format:"%.1f",UserDefaults.standard.float(forKey: ConfigViewController.durationControlRowKey))
+    durationControl.text = String(format:"%.1f",Defaults.durationControl)
     durationControl.textColor = .black
     durationControl.textAlignment = .center
     durationControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
@@ -98,6 +95,9 @@ class ConfigViewController: UIViewController {
     controlStack.addArrangedSubview(intervalControlRow)
     intervalControlRow.set(width: UIScreen.main.bounds.width - 10)
     intervalControlRow.set(height: 45)
+
+    let padding2 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
+    controlStack.addArrangedSubview(padding2)
 
     let intervalLabel = UILabel()
     intervalLabel.text = "Interval between (seconds)"
@@ -114,10 +114,32 @@ class ConfigViewController: UIViewController {
     intervalControl.textColor = .black
     intervalControl.textAlignment = .center
     intervalControl.keyboardType = .numberPad
-    intervalControl.text = String(format:"%.0f",UserDefaults.standard.float(forKey: ConfigViewController.intervalControlRowKey))
+    intervalControl.text = String(format:"%.0f",Defaults.intervalControl)
     intervalControl.delegate = self
     intervalControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
     intervalControl.layer.cornerRadius = 8
+    
+    
+//    let padding3 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 95))
+//    controlStack.addArrangedSubview(padding3)
+//    
+//    let soundLabel = UILabel()
+//    soundLabel.text = "Recording countdown sound"
+//    soundLabel.font = .systemFont(ofSize: 16)
+//    soundLabel.textColor = .black
+//    soundLabel.textAlignment = .center
+//    controlStack.addArrangedSubview(soundLabel)
+//    soundLabel.set(height: 50)
+//    
+//    soundSwitch = UISwitch()
+//    soundSwitch.isOn = Defaults.countdownSoundControl
+//    soundSwitch.addTarget(self, action: #selector(soundSwitchDidToggle), for: .valueChanged)
+//    controlStack.addArrangedSubview(soundSwitch)
+    
+  }
+  
+  @objc func soundSwitchDidToggle(sw: UISwitch) {
+    UserDefaults.standard.setValue(sw.isOn, forKey: "countdown-sounds")
   }
   
   static func interval(for intervalRow: Int) -> Float {
@@ -129,20 +151,12 @@ class ConfigViewController: UIViewController {
     return Float(intervalRow + 1) * 5
   }
   
-  static func configuredDurationSeconds() -> Float {
-    return UserDefaults.standard.float(forKey: ConfigViewController.durationControlRowKey)
-  }
-  
   static func configuredDurationText() -> String {
-    return String(format: "%.1f", configuredDurationSeconds())
-  }
-  
-  static func configuredIntervalSeconds() -> Float {
-    return UserDefaults.standard.float(forKey: ConfigViewController.intervalControlRowKey)
+    return String(format: "%.1f", Defaults.durationControl)
   }
   
   static func configuredIntervalText() -> String {
-    return String(format: "%d", Int(configuredIntervalSeconds()))
+    return String(format: "%d", Int(Defaults.intervalControl))
   }
   
   func setDuration(_ number: Float) {
@@ -150,7 +164,7 @@ class ConfigViewController: UIViewController {
       showAlert("Duration should be between 0.1 and 60 seconds")
       return
     }
-    UserDefaults.standard.set(number, forKey: ConfigViewController.durationControlRowKey)
+    Defaults.setDurationControl(number)
   }
 
   func setInterval(_ number: Float) {
@@ -158,7 +172,7 @@ class ConfigViewController: UIViewController {
       showAlert("Duration should be between 1 and 3600 seconds")
       return
     }
-    UserDefaults.standard.set(number, forKey: ConfigViewController.intervalControlRowKey)
+    Defaults.setIntervalControl(number)
   }
   
   func showAlert(_ message: String) {

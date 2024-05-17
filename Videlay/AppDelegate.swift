@@ -15,10 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Override point for customization after application launch.
     CrispSDK.configure(websiteID: "62d915a3-57bd-4867-af7b-b6bdb2bd3510")
     
-    if !UserDefaults.standard.bool(forKey: "firstlaunch") {
-      UserDefaults.standard.setValue(true, forKey: "firstlaunch")
-      UserDefaults.standard.set(9.0, forKey: ConfigViewController.durationControlRowKey)
-      UserDefaults.standard.set(1.0, forKey: ConfigViewController.intervalControlRowKey)
+    if Defaults.isFirstLaunch {
+      Defaults.setFirstLaunchFlag()
+      Defaults.setDefaultValues()
     }
     return true
   }
