@@ -362,7 +362,7 @@ class RecordingViewController: UIViewController {
       timerLabel.alpha = 1
       if let sesh = NextLevel.shared.session {
         let hasClip = sesh.clips.count > 0
-        configButton.isEnabled = hasClip
+        configButton.isEnabled = !hasClip
         previewButton.isEnabled = hasClip
       }
     case .activeInLoop:

@@ -38,11 +38,15 @@ class ExportPreviewViewController: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = .darkGray
     addPlayer()
-    preparePreview()
     addBackgroundPlaceholder()
     addActionButton()
   }
   
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    preparePreview()
+
+  }
   func preparePreview() {
     playerPlaybackDidEnd(player)
   }
