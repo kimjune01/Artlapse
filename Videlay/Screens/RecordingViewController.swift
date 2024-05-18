@@ -12,7 +12,8 @@ import Crisp
 import PhotosUI
 import Vision
 
-// If motion controlled, sequence is standby -> idle -> active -> waiting -> idle
+// If motion controlled, sequence is:
+//    standby -> idle -> detect motion -> delay -> active -> waiting -> idle
 // If timer controlled, sequence is standby -> active -> waiting -> active
 enum TimelapseState {
   case unknown
@@ -20,6 +21,7 @@ enum TimelapseState {
   case activeInLoop
   case waitingInLoop
   case idleInLoop
+  case delayingInLoop
 }
 
 protocol RecordingViewControllerDelegate: AnyObject {
@@ -30,8 +32,7 @@ class RecordingViewController: UIViewController {
   
   var delegate: RecordingViewControllerDelegate?
   
-  let contourRequest = VNDetectContoursRequest.init()
-  var contourCount = -1
+  let motionHelper = MotionHelper()
 
   let spinner = UIActivityIndicatorView(style: .large)
   var previewView = UIView()
@@ -65,7 +66,6 @@ class RecordingViewController: UIViewController {
     
     setupCameraPreview()
     configureCaptureSession()
-    setupVision()
     
     addButtons()
     addClockOverlay()
@@ -98,12 +98,6 @@ class RecordingViewController: UIViewController {
     previewView.layer.addSublayer(NextLevel.shared.previewLayer)
     self.view.addSubview(previewView)
 
-  }
-    
-  func setupVision() {
-    contourRequest.revision = VNDetectContourRequestRevision1
-    contourRequest.contrastAdjustment = 2
-    contourRequest.maximumImageDimension = 512
   }
 
   func addSpinner() {
@@ -390,6 +384,14 @@ class RecordingViewController: UIViewController {
       flipButton.isEnabled = false
       timerLabel.alpha = 1
       clockOverlay.cancelAnimations()
+    case .delayingInLoop:
+      recordButton.backgroundColor = .systemPink.withAlphaComponent(0.4)
+      recordButton.turnToRoundedRect()
+      configButton.isEnabled = false
+      chatButton.isEnabled = false
+      previewButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 0.3
     }
     
     previewButton.alpha = previewButton.isEnabled ? 1 : 0.3
@@ -440,6 +442,8 @@ class RecordingViewController: UIViewController {
       suspendTimelapse()
     case .idleInLoop:
       suspendTimelapse()
+    case .delayingInLoop:
+      print("do nothing")
     }
   }
   
@@ -573,41 +577,33 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
     let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
     do {
-      try imageRequestHandler.perform([contourRequest])
-      recordIfMotionSensed()
+      try imageRequestHandler.perform([motionHelper.contourRequest])
+      DispatchQueue.main.async {
+        self.configInfoVC.setMotionSense(self.motionHelper.motionSensed)
+      }
+      if motionHelper.didSenseMotion {
+        self.delayThenRecord()
+      }
     } catch {
       print(error)
     }
   }
   
-  func recordIfMotionSensed() {
-    guard let observation = contourRequest.results?.first else { return }
-    let oldCount = contourCount
-    contourCount = (oldCount + observation.contourCount) / 2
-    guard oldCount > 0 else { return }
-    let diff = abs(oldCount - contourCount)
-    guard diff > 0 else {
-      DispatchQueue.main.async {
-        self.configInfoVC.setMotionSense(0)
-      }
-      return
-    }
-    let motionSensed = Int(log2(Float(diff)))
+  func delayThenRecord() {
     DispatchQueue.main.async {
-      self.configInfoVC.setMotionSense(motionSensed)
-    }
-    let threshold = 5 - Defaults.motionSensitivity
-    if motionSensed > threshold {
-      DispatchQueue.main.async {
-        if self.timelapseState == .idleInLoop {
-          self.timelapseState = .activeInLoop
+      if self.timelapseState == .idleInLoop {
+        self.timelapseState = .delayingInLoop
+        self.clockOverlay.animateYellowCircle(duration: Defaults.delaySeconds)
+        DispatchQueue.main.asyncAfter(deadline: .now() + Defaults.delaySeconds) {
+          if self.timelapseState != .delayingInLoop {
+            // Expect nothing else to change while delaying in loop. UI should be disabled.
+            print("OOPS shouldn't be here!")
+          }
           self.recordSegment()
-          print("diff: ", diff)
-          print("motionSensed: ", motionSensed)
+          self.timelapseState = .activeInLoop
         }
       }
     }
-
   }
   
   func convertCIImageToCGImage(inputImage: CIImage) -> CGImage? {
@@ -669,7 +665,6 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   
   func nextLevel(_ nextLevel: NextLevel, didSkipVideoPixelBuffer pixelBuffer: CVPixelBuffer, timestamp: TimeInterval, inSession session: NextLevelSession) {
     print(" didSkipVideoPixelBuffer pixelBuffer??")
-
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendAudioSampleBuffer sampleBuffer: CMSampleBuffer, inSession session: NextLevelSession) {

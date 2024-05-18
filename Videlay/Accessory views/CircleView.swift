@@ -18,7 +18,7 @@ public class CircleView: UIView {
     for layer in [baseLayer, progressLayer] {
       layer.fillColor = UIColor.clear.cgColor
       layer.lineWidth = lineWidth
-      layer.lineCap = .round
+      layer.lineCap = .butt
     }
     baseLayer.strokeColor = baseColor.cgColor
     baseLayer.strokeEnd = 1.0

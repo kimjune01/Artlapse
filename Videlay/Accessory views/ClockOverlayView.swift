@@ -12,7 +12,7 @@ class ClockOverlayView: UIView {
   
   private let whiteCircle = CircleView(progress: 1, baseColor: .clear, progressColor: .white.withAlphaComponent(0.3))
   private let redCircle = CircleView(progress: 1, baseColor: .clear, progressColor: .red.withAlphaComponent(0.7))
-  
+  private let yellowCircle = CircleView(progress: 1, baseColor: .clear, progressColor: .yellow.withAlphaComponent(0.3))
   // assume portrait only.
   static let outerDiameter = UIScreen.main.bounds.width * 0.8
   
@@ -29,30 +29,43 @@ class ClockOverlayView: UIView {
     whiteCircle.frame = CGRect(x: 0, y: 0,
                                width: ClockOverlayView.outerDiameter,
                                height: ClockOverlayView.outerDiameter)
-    let smallerBy: CGFloat = 0.9
-    redCircle.frame = CGRect(x: ClockOverlayView.outerDiameter * (1 - smallerBy) / 2,
-                             y: ClockOverlayView.outerDiameter * (1 - smallerBy) / 2,
-                               width: ClockOverlayView.outerDiameter * smallerBy,
-                               height: ClockOverlayView.outerDiameter * smallerBy)
+    let redSmallerBy: CGFloat = 0.9
+    redCircle.frame = CGRect(x: ClockOverlayView.outerDiameter * (1 - redSmallerBy) / 2,
+                             y: ClockOverlayView.outerDiameter * (1 - redSmallerBy) / 2,
+                               width: ClockOverlayView.outerDiameter * redSmallerBy,
+                               height: ClockOverlayView.outerDiameter * redSmallerBy)
+    
+    let yellowSmallerBy: CGFloat = 0.8
+    yellowCircle.frame =  CGRect(x: ClockOverlayView.outerDiameter * (1 - yellowSmallerBy) / 2,
+                                 y: ClockOverlayView.outerDiameter * (1 - yellowSmallerBy) / 2,
+                                 width: ClockOverlayView.outerDiameter * yellowSmallerBy,
+                                 height: ClockOverlayView.outerDiameter * yellowSmallerBy)
     
     addSubview(whiteCircle)
     addSubview(redCircle)
+    addSubview(yellowCircle)
 
   }
   
   func animateWhiteCircle(duration: CGFloat) {
-    redCircle.cancelAnimations()
+    cancelAnimations()
     whiteCircle.animateCircle(duration: duration, delay: 0)
   }
 
   func animateRedCircle(duration: CGFloat) {
-    whiteCircle.cancelAnimations()
+    cancelAnimations()
     redCircle.animateCircle(duration: duration, delay: 0)
+  }
+  
+  func animateYellowCircle(duration: CGFloat) {
+    cancelAnimations()
+    yellowCircle.animateCircle(duration: duration, delay: 0)
   }
   
   func cancelAnimations() {
     redCircle.cancelAnimations()
     whiteCircle.cancelAnimations()
+    yellowCircle.cancelAnimations()
   }
 
   required init?(coder: NSCoder) {

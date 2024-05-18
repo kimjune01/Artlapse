@@ -1,9 +1,3 @@
-//
-//  ConfigViewController.swift
-//  Videlay
-//
-//  Created by June Kim on 10/9/22.
-//
 
 import UIKit
 
@@ -187,9 +181,9 @@ class ConfigViewController: UIViewController {
   @objc func motionSwitchDidToggle(sw: UISwitch) {
     Defaults.setMotionControl(sw.isOn)
     if (sw.isOn) {
-      showAlert("Turning on motion control will disable the timer, and use motion detection instead.")
+      showAlert("Turning on motion control will wait for a minimum of [interval] seconds, then wait for something to move.")
     } else {
-      showAlert("Turning off motion control will enable the timer, and motion detection will stop.")
+      showAlert("Thanks for trying motion control! Please provide feedback via the chat button.")
     }
     delegate?.configVCDidChangeConfig()
 

@@ -15,6 +15,7 @@ class Defaults {
   static let motionSensitivityKey = "countdown-sounds"
 
   static let maxMotionSensitivity = 5
+  static let delaySeconds = 1.0
   
   static var isFirstLaunch: Bool {
     return !UserDefaults.standard.bool(forKey: "firstlaunch")

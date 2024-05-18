@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E018FCC2BF96D780095CA15 /* MotionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCB2BF96D780095CA15 /* MotionHelper.swift */; };
 		0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */; };
 		0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */; };
 		0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1372BF40AAB00140AAB /* CircleView.swift */; };
@@ -45,6 +46,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0E018FCB2BF96D780095CA15 /* MotionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionHelper.swift; sourceTree = "<group>"; };
 		0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExportPreviewViewController.swift; sourceTree = "<group>"; };
 		0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		0E61C1372BF40AAB00140AAB /* CircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				0E61C1352BF4018700140AAB /* Screens */,
 				0E61C1362BF40A8F00140AAB /* Accessory views */,
 				0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */,
+				0E018FCB2BF96D780095CA15 /* MotionHelper.swift */,
 				0EB4B24728F3BD6A0036CFFF /* Extensions */,
 				0EC019F228EA5EBB000DD2C1 /* Main.storyboard */,
 				0EC019F528EA5EBD000DD2C1 /* Assets.xcassets */,
@@ -353,6 +356,7 @@
 				0E8686492BF51D5F00557C65 /* Defaults.swift in Sources */,
 				0EB4B26728F3BD700036CFFF /* UIViewController+.swift in Sources */,
 				0EB4B25C28F3BD700036CFFF /* UIStackView+.swift in Sources */,
+				0E018FCC2BF96D780095CA15 /* MotionHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,7 +503,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_TEAM = 59SVXWFZ98;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Videlay/Info.plist;
@@ -534,7 +538,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 17;
 				DEVELOPMENT_TEAM = 59SVXWFZ98;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Videlay/Info.plist;
