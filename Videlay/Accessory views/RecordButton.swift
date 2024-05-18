@@ -12,12 +12,18 @@ class RecordButton: UIView {
   
   override init(frame: CGRect) {
     super.init(frame: CGRect(x: frame.minX, y: frame.minY, width: defaultSize, height: defaultSize))
-    layer.cornerRadius = defaultSize / 3
-    layer.cornerCurve = .continuous
+    turnToRoundedRect()
   }
   
+  func turnToCircle() {
+    layer.cornerRadius = defaultSize / 2
+    layer.cornerCurve = .circular
+  }
   
-  
+  func turnToRoundedRect() {
+    layer.cornerRadius = defaultSize / 4
+    layer.cornerCurve = .continuous
+  }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")

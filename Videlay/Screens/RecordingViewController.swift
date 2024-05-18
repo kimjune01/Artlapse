@@ -10,12 +10,15 @@ import NextLevel
 import AVFoundation
 import Crisp
 import PhotosUI
+import Vision
 
-
+// If motion controlled, sequence is standby -> idle -> active -> waiting -> idle
+// If timer controlled, sequence is standby -> active -> waiting -> active
 enum TimelapseState {
   case unknown
   case standby
   case activeInLoop
+  case waitingInLoop
   case idleInLoop
 }
 
@@ -27,6 +30,9 @@ class RecordingViewController: UIViewController {
   
   var delegate: RecordingViewControllerDelegate?
   
+  let contourRequest = VNDetectContoursRequest.init()
+  var contourCount = -1
+
   let spinner = UIActivityIndicatorView(style: .large)
   var previewView = UIView()
   let minimumZoom: CGFloat = 0.5
@@ -46,8 +52,6 @@ class RecordingViewController: UIViewController {
   
   let configInfoVC = ConfigInfoViewController()
 
-  var cycleCounter = 0
-  
   var timelapseState: TimelapseState = .unknown {
     didSet {
       renderTimelapseState()
@@ -61,6 +65,8 @@ class RecordingViewController: UIViewController {
     
     setupCameraPreview()
     configureCaptureSession()
+    setupVision()
+    
     addButtons()
     addClockOverlay()
     addConfigInfoView()
@@ -76,6 +82,8 @@ class RecordingViewController: UIViewController {
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
 //    showConfigVC()
+    configInfoVC.refresh()
+
   }
   
   override func viewWillDisappear(_ animated: Bool) {
@@ -90,6 +98,12 @@ class RecordingViewController: UIViewController {
     previewView.layer.addSublayer(NextLevel.shared.previewLayer)
     self.view.addSubview(previewView)
 
+  }
+    
+  func setupVision() {
+    contourRequest.revision = VNDetectContourRequestRevision1
+    contourRequest.contrastAdjustment = 2
+    contourRequest.maximumImageDimension = 512
   }
 
   func addSpinner() {
@@ -109,7 +123,7 @@ class RecordingViewController: UIViewController {
     addRecordButton()
     addConfigButton()
     addTimerLabel()
-    addExportButton()
+    addPreviewButton()
     addFlipButton()
   }
   
@@ -200,8 +214,8 @@ class RecordingViewController: UIViewController {
   }
   
   func configureRunloop() {
-    let intervalSecs = Int(Defaults.intervalControl)
-    let durationSecs = Int(Defaults.durationControl)
+    let intervalSecs = Defaults.intervalControl
+    let durationSecs = Defaults.durationControl
     runloop.loopSeconds = intervalSecs + durationSecs
     runloop.delegate = self
   }
@@ -229,8 +243,8 @@ class RecordingViewController: UIViewController {
     // modify .videoConfiguration, .audioConfiguration, .photoConfiguration properties
     // Compression, resolution, and maximum recording time options are available
     NextLevel.shared.audioConfiguration.bitRate = 44000
-    NextLevel.shared.videoStabilizationMode = .standard
-    NextLevel.shared.disableAudioInputDevice()
+    NextLevel.shared.isVideoCustomContextRenderingEnabled = true
+    NextLevel.shared.videoStabilizationMode = .off
   }
   
   func addTimerLabel() {
@@ -242,7 +256,7 @@ class RecordingViewController: UIViewController {
     timerLabel.timeFormat()
   }
   
-  func addExportButton() {
+  func addPreviewButton() {
     var previewConfig = UIButton.Configuration.filled()
     previewConfig.baseForegroundColor = .white
     previewConfig.baseBackgroundColor = .black.withAlphaComponent(0.3)
@@ -251,6 +265,8 @@ class RecordingViewController: UIViewController {
     previewConfig.image = UIImage(systemName: "play.rectangle.fill")
 
     previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
+      self.runloop.stop()
+      self.timelapseState = .standby
       self.delegate?.gotoPreview()
     })
     controlsContainer.addSubview(previewButton)
@@ -331,6 +347,7 @@ class RecordingViewController: UIViewController {
     switch timelapseState {
     case .unknown:
       recordButton.backgroundColor = .gray
+      recordButton.turnToRoundedRect()
       configButton.isEnabled = false
       chatButton.isEnabled = true
       previewButton.isEnabled = false
@@ -339,13 +356,26 @@ class RecordingViewController: UIViewController {
     case .standby:
       spinner.stopAnimating()
       recordButton.backgroundColor = .systemRed
-      configButton.isEnabled = cycleCounter == 0
+      recordButton.turnToCircle()
       chatButton.isEnabled = true
-      previewButton.isEnabled = cycleCounter > 0
       flipButton.isEnabled = true
       timerLabel.alpha = 1
+      if let sesh = NextLevel.shared.session {
+        let hasClip = sesh.clips.count > 0
+        configButton.isEnabled = hasClip
+        previewButton.isEnabled = hasClip
+      }
     case .activeInLoop:
-      recordButton.backgroundColor = .systemPink.withAlphaComponent(0.5)
+      recordButton.backgroundColor = .systemPink.withAlphaComponent(0.4)
+      recordButton.turnToRoundedRect()
+      configButton.isEnabled = false
+      chatButton.isEnabled = false
+      previewButton.isEnabled = false
+      flipButton.isEnabled = false
+      timerLabel.alpha = 1
+    case .waitingInLoop:
+      recordButton.backgroundColor = .systemPink
+      recordButton.turnToRoundedRect()
       configButton.isEnabled = false
       chatButton.isEnabled = false
       previewButton.isEnabled = false
@@ -353,17 +383,21 @@ class RecordingViewController: UIViewController {
       timerLabel.alpha = 1
     case .idleInLoop:
       recordButton.backgroundColor = .systemPink
+      recordButton.turnToRoundedRect()
       configButton.isEnabled = false
       chatButton.isEnabled = false
       previewButton.isEnabled = false
       flipButton.isEnabled = false
       timerLabel.alpha = 1
+      clockOverlay.cancelAnimations()
     }
     
     previewButton.alpha = previewButton.isEnabled ? 1 : 0.3
     
-    let durationText = String(format: "%.1f", Float(cycleCounter) * Defaults.durationControl)
-    timerLabel.text = "Video length: " + durationText + "s"
+    if let sesh = NextLevel.shared.session {
+      let durationText = String(format: "%.1f", Float(sesh.clips.count) * Defaults.durationControl)
+      timerLabel.text = "Video length: " + durationText + "s"
+    }
   }
   
   @objc func pinch(_ pinch: UIPinchGestureRecognizer) {
@@ -390,23 +424,32 @@ class RecordingViewController: UIViewController {
     case .unknown:
       assert(false)
     case .standby:
-      runloop.start()
-      recordSegment()
-      timelapseState = .activeInLoop
       UIApplication.shared.isIdleTimerDisabled = true
+      if Defaults.motionControlEnabled {
+        timelapseState = .idleInLoop
+        // do not start recording until motion is detected.
+      } else {
+        runloop.start()
+        recordSegment()
+        timelapseState = .activeInLoop
+      }
 
     case .activeInLoop:
       print("do nothing")
+    case .waitingInLoop:
+      suspendTimelapse()
     case .idleInLoop:
-      runloop.stop()
-      BipBoopPlayer.stopCountdown()
-      clockOverlay.cancelAnimations()
-      timelapseState = .standby
+      suspendTimelapse()
     }
   }
   
+  func suspendTimelapse() {
+    runloop.stop()
+    clockOverlay.cancelAnimations()
+    timelapseState = .standby
+  }
+  
   func recordSegment() {
-    cycleCounter += 1
     NextLevel.shared.record()
     // timing done in delegate method below
   }
@@ -417,7 +460,6 @@ class RecordingViewController: UIViewController {
   
   
   func reset() {
-    cycleCounter = 0
     runloop.stop()
     timelapseState = .standby
     configInfoVC.refresh()
@@ -430,11 +472,11 @@ class RecordingViewController: UIViewController {
     let alertController = UIAlertController(title: "Save video?", message: "You can either save the video now or record more.", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Not yet", style: .cancel))
     alertController.addAction(UIAlertAction(title: "Save", style: .default) { action in
+      self.suspendTimelapse()
       self.delegate?.gotoPreview()
     })
     present(alertController, animated: true)
   }
-  
 }
 
 extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, NextLevelVideoDelegate {
@@ -527,11 +569,58 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   }
   
   func nextLevel(_ nextLevel: NextLevel, willProcessRawVideoSampleBuffer sampleBuffer: CMSampleBuffer, onQueue queue: DispatchQueue) {
-    
+    guard Defaults.motionControlEnabled else { return }
+    guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+    let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+    do {
+      try imageRequestHandler.perform([contourRequest])
+      recordIfMotionSensed()
+    } catch {
+      print(error)
+    }
   }
   
+  func recordIfMotionSensed() {
+    guard let observation = contourRequest.results?.first else { return }
+    let oldCount = contourCount
+    contourCount = (oldCount + observation.contourCount) / 2
+    guard oldCount > 0 else { return }
+    let diff = abs(oldCount - contourCount)
+    guard diff > 0 else {
+      DispatchQueue.main.async {
+        self.configInfoVC.setMotionSense(0)
+      }
+      return
+    }
+    let motionSensed = Int(log2(Float(diff)))
+    DispatchQueue.main.async {
+      self.configInfoVC.setMotionSense(motionSensed)
+    }
+    let threshold = 5 - Defaults.motionSensitivity
+    if motionSensed > threshold {
+      DispatchQueue.main.async {
+        if self.timelapseState == .idleInLoop {
+          self.timelapseState = .activeInLoop
+          self.recordSegment()
+          print("diff: ", diff)
+          print("motionSensed: ", motionSensed)
+        }
+      }
+    }
+
+  }
+  
+  func convertCIImageToCGImage(inputImage: CIImage) -> CGImage? {
+    let context = CIContext(options: nil)
+    if let cgImage = context.createCGImage(inputImage, from: inputImage.extent) {
+      return cgImage
+    }
+    return nil
+  }
+  
+  
   func nextLevel(_ nextLevel: NextLevel, renderToCustomContextWithImageBuffer imageBuffer: CVPixelBuffer, onQueue queue: DispatchQueue) {
-    
+
   }
   
   func nextLevel(_ nextLevel: NextLevel, willProcessFrame frame: AnyObject, timestamp: TimeInterval, onQueue queue: DispatchQueue) {
@@ -548,12 +637,18 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   
   func nextLevel(_ nextLevel: NextLevel, didStartClipInSession session: NextLevelSession) {
     let duration = TimeInterval(Defaults.durationControl)
+    let interval = TimeInterval(Defaults.intervalControl)
     clockOverlay.animateRedCircle(duration: duration)
     Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
       NextLevel.shared.pause()
-      self.timelapseState = .idleInLoop
-      let intervalSeconds = CGFloat(Defaults.intervalControl)
-      self.clockOverlay.animateWhiteCircle(duration: intervalSeconds)
+      self.timelapseState = .waitingInLoop
+      self.clockOverlay.animateWhiteCircle(duration: interval)
+    }
+    // should be cancelable
+    Timer.scheduledTimer(withTimeInterval: duration + interval, repeats: false) { timer in
+      if Defaults.motionControlEnabled, self.timelapseState == .waitingInLoop {
+        self.timelapseState = .idleInLoop
+      }
     }
   }
   
@@ -562,18 +657,19 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendVideoSampleBuffer sampleBuffer: CMSampleBuffer, inSession session: NextLevelSession) {
-    
   }
   
   func nextLevel(_ nextLevel: NextLevel, didSkipVideoSampleBuffer sampleBuffer: CMSampleBuffer, inSession session: NextLevelSession) {
-    
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendVideoPixelBuffer pixelBuffer: CVPixelBuffer, timestamp: TimeInterval, inSession session: NextLevelSession) {
+    print(" didAppendVideoPixelBuffer pixelBuffer??")
+
   }
   
   func nextLevel(_ nextLevel: NextLevel, didSkipVideoPixelBuffer pixelBuffer: CVPixelBuffer, timestamp: TimeInterval, inSession session: NextLevelSession) {
-    
+    print(" didSkipVideoPixelBuffer pixelBuffer??")
+
   }
   
   func nextLevel(_ nextLevel: NextLevel, didAppendAudioSampleBuffer sampleBuffer: CMSampleBuffer, inSession session: NextLevelSession) {
@@ -596,14 +692,11 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
 
 extension RecordingViewController: ClockRunloopDelegate {
   func clockDidCycleLoop() {
-    timelapseState = .activeInLoop
-    recordSegment()
-  }
-  
-  func clockDidProgressLoop() {
-    renderTimelapseState()
-    if runloop.secondsRemaining == 3 {
-//      BipBoopPlayer.startCountdown()
+    if timelapseState == .idleInLoop || timelapseState == .waitingInLoop {
+      timelapseState = .activeInLoop
+      recordSegment()
+    } else {
+      runloop.stop()
     }
   }
 }

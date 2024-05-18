@@ -20,10 +20,14 @@ class ConfigViewController: UIViewController {
   
   let durationControlTag = 0
   let intervalControlTag = 1
+  let sensitivityControlTag = 2
   
   var durationControl: UITextField!
   var intervalControl: UITextField!
-  var soundSwitch: UISwitch!
+//  var soundSwitch: UISwitch!
+  var motionControlSwitch: UISwitch!
+  var sensitivityControl: UITextField!
+  
 
   weak var delegate: ConfigViewControllerDelegate?
 
@@ -119,6 +123,48 @@ class ConfigViewController: UIViewController {
     intervalControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
     intervalControl.layer.cornerRadius = 8
     
+    let padding3 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 95))
+    controlStack.addArrangedSubview(padding3)
+
+    let motionLabel = UILabel()
+    motionLabel.text = "Motion control"
+    motionLabel.font = .systemFont(ofSize: 16)
+    motionLabel.textColor = .black
+    motionLabel.textAlignment = .center
+    controlStack.addArrangedSubview(motionLabel)
+    motionLabel.set(height: 50)
+
+    motionControlSwitch = UISwitch()
+    motionControlSwitch.isOn = Defaults.motionControlEnabled
+    motionControlSwitch.addTarget(self, action: #selector(motionSwitchDidToggle), for: .valueChanged)
+    controlStack.addArrangedSubview(motionControlSwitch)
+    
+    let padding4 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
+    controlStack.addArrangedSubview(padding4)
+    
+    let sensitivityLabel = UILabel()
+    sensitivityLabel.text = "Motion sensitivity (1 - 5)"
+    sensitivityLabel.textAlignment = .center
+    sensitivityLabel.font = .systemFont(ofSize: 16)
+    sensitivityLabel.textColor = .black
+    controlStack.addArrangedSubview(sensitivityLabel)
+
+    let padding5 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
+    controlStack.addArrangedSubview(padding5)
+    
+
+    sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+    controlStack.addArrangedSubview(sensitivityControl)
+    sensitivityControl.tag = sensitivityControlTag
+    sensitivityControl.set(width: 100)
+    sensitivityControl.set(height: 65)
+    sensitivityControl.textColor = .black
+    sensitivityControl.textAlignment = .center
+    sensitivityControl.keyboardType = .numberPad
+    sensitivityControl.text = String(format:"%d",Defaults.motionSensitivity)
+    sensitivityControl.delegate = self
+    sensitivityControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
+    sensitivityControl.layer.cornerRadius = 8
     
 //    let padding3 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 95))
 //    controlStack.addArrangedSubview(padding3)
@@ -138,8 +184,15 @@ class ConfigViewController: UIViewController {
     
   }
   
-  @objc func soundSwitchDidToggle(sw: UISwitch) {
-    UserDefaults.standard.setValue(sw.isOn, forKey: "countdown-sounds")
+  @objc func motionSwitchDidToggle(sw: UISwitch) {
+    Defaults.setMotionControl(sw.isOn)
+    if (sw.isOn) {
+      showAlert("Turning on motion control will disable the timer, and use motion detection instead.")
+    } else {
+      showAlert("Turning off motion control will enable the timer, and motion detection will stop.")
+    }
+    delegate?.configVCDidChangeConfig()
+
   }
   
   static func interval(for intervalRow: Int) -> Float {
@@ -159,9 +212,14 @@ class ConfigViewController: UIViewController {
     return String(format: "%d", Int(Defaults.intervalControl))
   }
   
+  static func configuredMotionText() -> String {
+    return String(format: "%d", Defaults.motionSensitivity)
+  }
+  
   func setDuration(_ number: Float) {
     guard number >= 0.1, number < 60 else {
       showAlert("Duration should be between 0.1 and 60 seconds")
+      durationControl.becomeFirstResponder()
       return
     }
     Defaults.setDurationControl(number)
@@ -169,14 +227,24 @@ class ConfigViewController: UIViewController {
 
   func setInterval(_ number: Float) {
     guard number > 1, number < 3600 else {
-      showAlert("Duration should be between 1 and 3600 seconds")
+      showAlert("Interval should be between 1 and 3600 seconds")
+      intervalControl.becomeFirstResponder()
       return
     }
     Defaults.setIntervalControl(number)
   }
   
+  func setMotionSensitivity(_ number: Int) {
+    guard number > 0, number <= 5 else {
+      showAlert("Sensitivity should be between 1 and 5. 5 is most sensitive.")
+      sensitivityControl.becomeFirstResponder()
+      return
+    }
+    Defaults.setMotionSensitivity(number)
+  }
+  
   func showAlert(_ message: String) {
-    let alert = UIAlertController(title: "Oops!", message: message, preferredStyle: .alert)
+    let alert = UIAlertController(title: "Attention", message: message, preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK", style: .default) { _ in
       
     }
@@ -202,11 +270,16 @@ extension ConfigViewController: UITextFieldDelegate {
       showAlert("Input a number")
       return
     }
-    if textField.tag == durationControlTag {
+    switch textField.tag {
+    case durationControlTag:
       setDuration(number)
-    }
-    if textField.tag == intervalControlTag {
+    case intervalControlTag:
       setInterval(number)
+    case sensitivityControlTag:
+      setMotionSensitivity(Int(number))
+    default:
+      assert(false)
     }
+    delegate?.configVCDidChangeConfig()
   }
 }
