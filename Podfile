@@ -9,5 +9,7 @@ target 'Videlay' do
 pod "NextLevel"
 pod "Player"
 pod 'Crisp'
+pod "MediaWatermark"
+
 
 end
