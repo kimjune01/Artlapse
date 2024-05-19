@@ -8,53 +8,64 @@
 import Foundation
 
 class Defaults {
+  private static let std = UserDefaults.standard
   // Floats represent seconds
   static let durationControlRowKey = "durationControlRowKey"
   static let intervalControlRowKey = "intervalControlRowKey"
   static let motionControlKey = "motion-enabled"
   static let motionSensitivityKey = "countdown-sounds"
+  static let watermarkKey = "watermark-preference"
 
   static let maxMotionSensitivity = 5
   static let delaySeconds = 1.0
   
   static var isFirstLaunch: Bool {
-    return !UserDefaults.standard.bool(forKey: "firstlaunch")
+    return !std.bool(forKey: "firstlaunch")
   }
   static func setFirstLaunchFlag() {
-    UserDefaults.standard.setValue(true, forKey: "firstlaunch")
+    std.setValue(true, forKey: "firstlaunch")
   }
   // Guarantees non-nil values for defaults
   static func setDefaultValues() {
-    UserDefaults.standard.set(9.0, forKey: durationControlRowKey)
-    UserDefaults.standard.set(1.0, forKey: intervalControlRowKey)
-    UserDefaults.standard.setValue(false, forKey: motionControlKey)
-    UserDefaults.standard.set(1, forKey: motionSensitivityKey)
+    std.set(9.0, forKey: durationControlRowKey)
+    std.set(1.0, forKey: intervalControlRowKey)
+    std.setValue(false, forKey: motionControlKey)
+    std.set(1, forKey: motionSensitivityKey)
+    std.set(true, forKey: watermarkKey)
   }
+  
   static var durationControl: Float {
-    return UserDefaults.standard.float(forKey: durationControlRowKey)
+    return std.float(forKey: durationControlRowKey)
   }
   static var intervalControl: Float {
-    return UserDefaults.standard.float(forKey: intervalControlRowKey)
+    return std.float(forKey: intervalControlRowKey)
   }
   static var countdownSoundControl: Bool {
-    return UserDefaults.standard.bool(forKey: "countdown-sounds")
+    return std.bool(forKey: "countdown-sounds")
   }
   static var motionControlEnabled: Bool {
-    return UserDefaults.standard.bool(forKey: motionControlKey)
+    return std.bool(forKey: motionControlKey)
   }
   static var motionSensitivity: Int {
-    return UserDefaults.standard.integer(forKey: motionSensitivityKey)
+    return std.integer(forKey: motionSensitivityKey)
   }
+  static var watermarkPreference: Bool {
+    return std.bool(forKey: watermarkKey)
+  }
+  
   static func setDurationControl(_ number: Float) {
-    UserDefaults.standard.set(number, forKey: durationControlRowKey)
+    std.set(number, forKey: durationControlRowKey)
   }
   static func setIntervalControl(_ number: Float) {
-    UserDefaults.standard.set(number, forKey: intervalControlRowKey)
+    std.set(number, forKey: intervalControlRowKey)
   }
   static func setMotionControl(_ enabled: Bool) {
-    UserDefaults.standard.setValue(enabled, forKey: motionControlKey)
+    std.setValue(enabled, forKey: motionControlKey)
   }
   static func setMotionSensitivity(_ sensitivity: Int) {
-    UserDefaults.standard.setValue(sensitivity, forKey: motionSensitivityKey)
+    std.setValue(sensitivity, forKey: motionSensitivityKey)
+  }
+  static func setWatermarkPreference(_ pref: Bool) {
+    std.setValue(pref, forKey: watermarkKey)
   }
 }

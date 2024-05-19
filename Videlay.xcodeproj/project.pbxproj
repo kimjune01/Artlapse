@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0E018FCC2BF96D780095CA15 /* MotionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCB2BF96D780095CA15 /* MotionHelper.swift */; };
 		0E018FCE2BFAB2A20095CA15 /* Watermarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCD2BFAB2A20095CA15 /* Watermarker.swift */; };
+		0E018FD02BFABDC90095CA15 /* PreferenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCF2BFABDC90095CA15 /* PreferenceRow.swift */; };
 		0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */; };
 		0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */; };
 		0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1372BF40AAB00140AAB /* CircleView.swift */; };
@@ -49,6 +50,7 @@
 /* Begin PBXFileReference section */
 		0E018FCB2BF96D780095CA15 /* MotionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionHelper.swift; sourceTree = "<group>"; };
 		0E018FCD2BFAB2A20095CA15 /* Watermarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watermarker.swift; sourceTree = "<group>"; };
+		0E018FCF2BFABDC90095CA15 /* PreferenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferenceRow.swift; sourceTree = "<group>"; };
 		0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExportPreviewViewController.swift; sourceTree = "<group>"; };
 		0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		0E61C1372BF40AAB00140AAB /* CircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 				0E61C1372BF40AAB00140AAB /* CircleView.swift */,
 				0ED729992BF4192100AA6908 /* ConfigInfoViewController.swift */,
 				0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */,
+				0E018FCF2BFABDC90095CA15 /* PreferenceRow.swift */,
 			);
 			path = "Accessory views";
 			sourceTree = "<group>";
@@ -335,6 +338,7 @@
 				0EC019F128EA5EBB000DD2C1 /* RecordingViewController.swift in Sources */,
 				0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */,
 				0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */,
+				0E018FD02BFABDC90095CA15 /* PreferenceRow.swift in Sources */,
 				0EB4B26028F3BD700036CFFF /* FileManager+.swift in Sources */,
 				0E8686472BF5187900557C65 /* BipBoopPlayer.swift in Sources */,
 				0EEADD8F28F3BE5A004F7BE5 /* RecordButton.swift in Sources */,

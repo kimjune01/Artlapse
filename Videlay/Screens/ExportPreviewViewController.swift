@@ -33,13 +33,15 @@ class ExportPreviewViewController: UIViewController {
   var assetUrl: URL?
   var playbackCounter = 0
   let backgroundPlaceholder = UIImageView()
-  
+  let spinner = UIActivityIndicatorView(style: .large)
+
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .darkGray
     addPlayer()
     addBackgroundPlaceholder()
     addActionButton()
+    addSpinner()
   }
   
   override func viewDidAppear(_ animated: Bool) {
@@ -63,43 +65,60 @@ class ExportPreviewViewController: UIViewController {
     backgroundPlaceholder.contentMode = .scaleAspectFit
   }
   
-  func export() {
+  func addSpinner() {
+    view.addSubview(spinner)
+    spinner.centerXInParent()
+    spinner.centerYInParent(offset: -30)
+  }
+  
+  func mergeClips(_ completion: @escaping (URL) -> ()) {
     guard let session = NextLevel.shared.session else {
       assert(false)
       return
     }
     
-    actionButton.isEnabled = false
-
     session.mergeClips(usingPreset: AVAssetExportPresetHighestQuality) { url, err in
       guard let url = url, err == nil else {
-        self.showExportFailAlert()
-        self.actionButton.isEnabled = true
-        return
-      }
-      self.saveVideoToPhotosAlbum(url) { saved in
         DispatchQueue.main.async {
-          if saved {
-            self.showSavedSuccessAlert()
-          } else {
-            self.showNotSavedAlert()
-          }
+          self.showExportFailAlert()
           self.actionButton.isEnabled = true
         }
+        return
       }
+      completion(url)
     }
   }
   
-  func saveVideoToAlbum(_ outputURL: URL, _ completion: @escaping (Error?) -> ()) {
-    PHPhotoLibrary.shared().performChanges({
-      let request = PHAssetCreationRequest.forAsset()
-      request.addResource(with: .video, fileURL: outputURL, options: nil)
-    }) { (result, error) in
-      DispatchQueue.main.async {
-        if let error = error {
-          print(error.localizedDescription)
+  func showExportCompleted(_ saved: Bool) {
+    if saved {
+      showSavedSuccessAlert()
+    } else {
+      showNotSavedAlert()
+    }
+    actionButton.isEnabled = true
+    navigationController?.navigationBar.isUserInteractionEnabled = true
+    spinner.stopAnimating()
+  }
+  
+  func showExportProgressing() {
+    actionButton.isEnabled = false
+    navigationController?.navigationBar.isUserInteractionEnabled = false
+    spinner.startAnimating()
+  }
+  
+  func export() {
+    showExportProgressing()
+    DispatchQueue.global().async { [weak self] in
+      guard let self = self else { return }
+      self.mergeClips() { url in
+        Watermarker.watermark(video: url) { watermarkedUrl, err in
+          let outputUrl = watermarkedUrl ?? url
+          self.saveVideoToPhotosAlbum(outputUrl) { saved in
+            DispatchQueue.main.async {
+              self.showExportCompleted(saved)
+            }
+          }
         }
-        completion(error)
       }
     }
   }
@@ -107,7 +126,7 @@ class ExportPreviewViewController: UIViewController {
   func showExportFailAlert() {
     let alertController = UIAlertController(title: "Export failed", message: "I'm not quite sure why but it didn't work for some reason. Maybe you can tell me in the chat?", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "OK", style: .cancel, handler: { action in
-//      self.reset()
+      // TODO: reset?
     }))
     present(alertController, animated: true)
   }
@@ -172,9 +191,10 @@ class ExportPreviewViewController: UIViewController {
       PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
     }
     PHPhotoLibrary.shared().performChanges(changes) { saved, error in
-      DispatchQueue.main.async {
-        completion(saved)
+      if let error = error {
+        print(error.localizedDescription)
       }
+      completion(saved)
     }
   }
   
@@ -215,7 +235,7 @@ class ExportPreviewViewController: UIViewController {
   
   func showSavedSuccessAlert() {
     let title = "Success"
-    let message = "Video saved in your photos album"
+    let message = "Video saved in your photos album. If you like Artlapse, leave a positive review on the app store!"
     
     let alert = UIAlertController(
       title: title,

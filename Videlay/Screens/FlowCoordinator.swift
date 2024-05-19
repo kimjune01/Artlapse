@@ -42,8 +42,10 @@ extension FlowCoordinator: RecordingViewControllerDelegate {
 extension FlowCoordinator: ExportPreviewViewControllerDelegate {
   func exportPreviewVCDidFinish(_ previewVC: ExportPreviewViewController) {
     navController.popToRootViewController(animated: true)
-    if let recVC = navController.topViewController as? RecordingViewController {
-      recVC.reset()
+    for eachVC in navController.viewControllers {
+      if let recVC = eachVC as? RecordingViewController {
+        recVC.reset()
+      }
     }
   }
 }

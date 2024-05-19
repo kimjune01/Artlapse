@@ -8,23 +8,24 @@
 import Foundation
 import MediaWatermark
 
+enum WatermarkError: Error {
+  case MediaItemCannotBeCreated
+}
+
 class Watermarker {
   static func watermark(video url: URL, completion: @escaping (_: URL?, _:Error?) -> ()) {
-    guard let item = MediaItem(url: url) else { return }
-    let logoImage = UIImage(named: "AppIcon")
+    guard Defaults.watermarkPreference else { completion(url, nil); return }
+    guard let item = MediaItem(url: url) else { completion(nil, WatermarkError.MediaItemCannotBeCreated); return }
     
-    let firstElement = MediaElement(image: logoImage!)
-    firstElement.frame = CGRect(x: 0, y: 0, width: logoImage!.size.width, height: logoImage!.size.height)
-    
-    let testStr = "Attributed Text"
-    let attributes = [NSAttributedString.Key.foregroundColor: UIColor.white,
-                      NSAttributedString.Key.font: UIFont.systemFont(ofSize: 35) ]
+    let testStr = "recorded with Artlapse"
+    let attributes = [NSAttributedString.Key.foregroundColor: UIColor.white.withAlphaComponent(0.4),
+                      NSAttributedString.Key.font: UIFont.monospacedSystemFont(ofSize: 55, weight: .medium) ]
     let attrStr = NSAttributedString(string: testStr, attributes: attributes)
     
     let secondElement = MediaElement(text: attrStr)
-    secondElement.frame = CGRect(x: 300, y: 300, width: logoImage!.size.width, height: logoImage!.size.height)
+    secondElement.frame = CGRect(x: 10, y: 10, width: 1000, height: 100)
     
-    item.add(elements: [firstElement, secondElement])
+    item.add(elements: [secondElement])
     
     let mediaProcessor = MediaProcessor()
     mediaProcessor.processElements(item: item) { (result, error) in

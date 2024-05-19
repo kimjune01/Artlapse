@@ -21,6 +21,7 @@ class ConfigViewController: UIViewController {
 //  var soundSwitch: UISwitch!
   var motionControlSwitch: UISwitch!
   var sensitivityControl: UITextField!
+  var watermarkControlSwitch: UISwitch!
   
 
   weak var delegate: ConfigViewControllerDelegate?
@@ -53,129 +54,69 @@ class ConfigViewController: UIViewController {
     let controlStack = UIStackView()
     controlStack.axis = .vertical
     controlStack.alignment = .center
+    controlStack.spacing = 18
     view.addSubview(controlStack)
     controlStack.centerXInParent()
     controlStack.setTopToParent(margin: 50)
-
-    let durationControlRow = UIStackView()
-    durationControlRow.axis = .horizontal
-    durationControlRow.alignment = .fill
-    controlStack.addArrangedSubview(durationControlRow)
-    durationControlRow.set(width: UIScreen.main.bounds.width - 10)
-    durationControlRow.set(height: 45)
     
-    let padding = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
-    controlStack.addArrangedSubview(padding)
-
-    let durationLabel = UILabel()
-    durationLabel.text = "Record duration (seconds)"
-    durationLabel.font = .systemFont(ofSize: 16)
-    durationLabel.textColor = .black
-    durationLabel.textAlignment = .center
-    durationControlRow.addArrangedSubview(durationLabel)
+    let durationControlRow = PreferenceRow(labelText: "Record duration (seconds)")
+    controlStack.addArrangedSubview(durationControlRow)
+    durationControlRow.set(width: view.width - 24)
 
     durationControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-    controlStack.addArrangedSubview(durationControl)
+    durationControlRow.addArrangedSubview(durationControl)
     durationControl.tag = durationControlTag
-    durationControl.set(width: 100)
-    durationControl.set(height: 65)
-    durationControl.keyboardType = .decimalPad
     durationControl.text = String(format:"%.1f",Defaults.durationControl)
-    durationControl.textColor = .black
-    durationControl.textAlignment = .center
-    durationControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
-    durationControl.layer.cornerRadius = 8
-    durationControl.delegate = self
+    configureNumbered(textfield: durationControl)
     
-    let intervalControlRow = UIStackView()
-    intervalControlRow.axis = .horizontal
-    intervalControlRow.alignment = .fill
+    let intervalControlRow = PreferenceRow(labelText: "Interval between (seconds)")
     controlStack.addArrangedSubview(intervalControlRow)
-    intervalControlRow.set(width: UIScreen.main.bounds.width - 10)
-    intervalControlRow.set(height: 45)
+    intervalControlRow.set(width: view.width - 24)
 
-    let padding2 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
-    controlStack.addArrangedSubview(padding2)
-
-    let intervalLabel = UILabel()
-    intervalLabel.text = "Interval between (seconds)"
-    intervalLabel.textAlignment = .center
-    intervalLabel.font = .systemFont(ofSize: 16)
-    intervalLabel.textColor = .black
-    intervalControlRow.addArrangedSubview(intervalLabel)
-    
     intervalControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-    controlStack.addArrangedSubview(intervalControl)
+    intervalControlRow.addArrangedSubview(intervalControl)
     intervalControl.tag = intervalControlTag
-    intervalControl.set(width: 100)
-    intervalControl.set(height: 65)
-    intervalControl.textColor = .black
-    intervalControl.textAlignment = .center
-    intervalControl.keyboardType = .numberPad
+    configureNumbered(textfield: intervalControl)
     intervalControl.text = String(format:"%.0f",Defaults.intervalControl)
-    intervalControl.delegate = self
-    intervalControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
-    intervalControl.layer.cornerRadius = 8
+
+    let motionControlRow = PreferenceRow(labelText: "Motion control")
+    controlStack.addArrangedSubview(motionControlRow)
+    motionControlRow.set(width: view.width - 24)
     
-    let padding3 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 95))
-    controlStack.addArrangedSubview(padding3)
-
-    let motionLabel = UILabel()
-    motionLabel.text = "Motion control"
-    motionLabel.font = .systemFont(ofSize: 16)
-    motionLabel.textColor = .black
-    motionLabel.textAlignment = .center
-    controlStack.addArrangedSubview(motionLabel)
-    motionLabel.set(height: 50)
-
     motionControlSwitch = UISwitch()
     motionControlSwitch.isOn = Defaults.motionControlEnabled
     motionControlSwitch.addTarget(self, action: #selector(motionSwitchDidToggle), for: .valueChanged)
-    controlStack.addArrangedSubview(motionControlSwitch)
+    motionControlRow.addArrangedSubview(motionControlSwitch)
     
-    let padding4 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
-    controlStack.addArrangedSubview(padding4)
+    let sensitivityControlRow = PreferenceRow(labelText: "Motion sensitivity (1 - 5)")
+    controlStack.addArrangedSubview(sensitivityControlRow)
+    sensitivityControlRow.set(width: view.width - 24)
     
-    let sensitivityLabel = UILabel()
-    sensitivityLabel.text = "Motion sensitivity (1 - 5)"
-    sensitivityLabel.textAlignment = .center
-    sensitivityLabel.font = .systemFont(ofSize: 16)
-    sensitivityLabel.textColor = .black
-    controlStack.addArrangedSubview(sensitivityLabel)
-
-    let padding5 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 75))
-    controlStack.addArrangedSubview(padding5)
-    
-
     sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-    controlStack.addArrangedSubview(sensitivityControl)
+    sensitivityControlRow.addArrangedSubview(sensitivityControl)
     sensitivityControl.tag = sensitivityControlTag
-    sensitivityControl.set(width: 100)
-    sensitivityControl.set(height: 65)
-    sensitivityControl.textColor = .black
-    sensitivityControl.textAlignment = .center
-    sensitivityControl.keyboardType = .numberPad
     sensitivityControl.text = String(format:"%d",Defaults.motionSensitivity)
-    sensitivityControl.delegate = self
-    sensitivityControl.backgroundColor = .lightGray.withAlphaComponent(0.5)
-    sensitivityControl.layer.cornerRadius = 8
+    configureNumbered(textfield: sensitivityControl)
     
-//    let padding3 = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 95))
-//    controlStack.addArrangedSubview(padding3)
-//    
-//    let soundLabel = UILabel()
-//    soundLabel.text = "Recording countdown sound"
-//    soundLabel.font = .systemFont(ofSize: 16)
-//    soundLabel.textColor = .black
-//    soundLabel.textAlignment = .center
-//    controlStack.addArrangedSubview(soundLabel)
-//    soundLabel.set(height: 50)
-//    
-//    soundSwitch = UISwitch()
-//    soundSwitch.isOn = Defaults.countdownSoundControl
-//    soundSwitch.addTarget(self, action: #selector(soundSwitchDidToggle), for: .valueChanged)
-//    controlStack.addArrangedSubview(soundSwitch)
+    let watermarkControlRow = PreferenceRow(labelText: "Artlapse Watermark")
+    controlStack.addArrangedSubview(watermarkControlRow)
+    watermarkControlRow.set(width: view.width - 24)
     
+    watermarkControlSwitch = UISwitch()
+    watermarkControlSwitch.isOn = Defaults.watermarkPreference
+    watermarkControlSwitch.addTarget(self, action: #selector(watermarkSwitchDidToggle), for: .valueChanged)
+    watermarkControlRow.addArrangedSubview(watermarkControlSwitch)
+  }
+  
+  func configureNumbered(textfield: UITextField) {
+    textfield.set(width: 100)
+    textfield.set(height: 65)
+    textfield.keyboardType = .decimalPad
+    textfield.textColor = .black
+    textfield.textAlignment = .center
+    textfield.backgroundColor = .lightGray.withAlphaComponent(0.5)
+    textfield.layer.cornerRadius = 8
+    textfield.delegate = self
   }
   
   @objc func motionSwitchDidToggle(sw: UISwitch) {
@@ -186,7 +127,14 @@ class ConfigViewController: UIViewController {
       showAlert("Thanks for trying motion control! Please provide feedback via the chat button.")
     }
     delegate?.configVCDidChangeConfig()
-
+  }
+  
+  @objc func watermarkSwitchDidToggle(sw: UISwitch) {
+    Defaults.setWatermarkPreference(sw.isOn)
+    if (sw.isOn) {
+      showAlert("Thanks for supporting Artlapse!")
+    }
+    delegate?.configVCDidChangeConfig()
   }
   
   static func interval(for intervalRow: Int) -> Float {
