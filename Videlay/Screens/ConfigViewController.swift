@@ -95,7 +95,7 @@ class ConfigViewController: UIViewController {
     sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
     sensitivityControlRow.addArrangedSubview(sensitivityControl)
     sensitivityControl.tag = sensitivityControlTag
-    sensitivityControl.text = String(format:"%d",Defaults.motionSensitivity)
+    sensitivityControl.text = String(format:".1f",Defaults.motionSensitivity)
     configureNumbered(textfield: sensitivityControl)
     
     let watermarkControlRow = PreferenceRow(labelText: "Artlapse Watermark")
@@ -155,7 +155,7 @@ class ConfigViewController: UIViewController {
   }
   
   static func configuredMotionText() -> String {
-    return String(format: "%d", Defaults.motionSensitivity)
+    return String(format: "%.1f", Defaults.motionSensitivity)
   }
   
   func setDuration(_ number: Float) {
@@ -176,9 +176,9 @@ class ConfigViewController: UIViewController {
     Defaults.setIntervalControl(number)
   }
   
-  func setMotionSensitivity(_ number: Int) {
-    guard number > 0, number <= 5 else {
-      showAlert("Sensitivity should be between 1 and 5. 5 is most sensitive.")
+  func setMotionSensitivity(_ number: Float) {
+    guard number >= 0.1, number <= 5 else {
+      showAlert("Sensitivity should be between 0.1 and 5. 5 is most sensitive.")
       sensitivityControl.becomeFirstResponder()
       return
     }
@@ -218,7 +218,7 @@ extension ConfigViewController: UITextFieldDelegate {
     case intervalControlTag:
       setInterval(number)
     case sensitivityControlTag:
-      setMotionSensitivity(Int(number))
+      setMotionSensitivity(number)
     default:
       assert(false)
     }

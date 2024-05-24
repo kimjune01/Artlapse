@@ -353,10 +353,10 @@ class RecordingViewController: UIViewController {
       recordButton.turnToCircle()
       chatButton.isEnabled = true
       flipButton.isEnabled = true
+      configButton.isEnabled = true
       timerLabel.alpha = 1
       if let sesh = NextLevel.shared.session {
         let hasClip = sesh.clips.count > 0
-        configButton.isEnabled = !hasClip
         previewButton.isEnabled = hasClip
       }
     case .activeInLoop:
@@ -574,6 +574,8 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   
   func nextLevel(_ nextLevel: NextLevel, willProcessRawVideoSampleBuffer sampleBuffer: CMSampleBuffer, onQueue queue: DispatchQueue) {
     guard Defaults.motionControlEnabled else { return }
+    MotionHelper.sampleThrottleCounter += 1
+    guard MotionHelper.sampleThrottleCounter % MotionHelper.ThrottleCycle == 0 else { return }
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
     let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
     do {
@@ -635,13 +637,13 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
     let duration = TimeInterval(Defaults.durationControl)
     let interval = TimeInterval(Defaults.intervalControl)
     clockOverlay.animateRedCircle(duration: duration)
-    Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { timer in
+    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
       NextLevel.shared.pause()
       self.timelapseState = .waitingInLoop
       self.clockOverlay.animateWhiteCircle(duration: interval)
     }
     // should be cancelable
-    Timer.scheduledTimer(withTimeInterval: duration + interval, repeats: false) { timer in
+    DispatchQueue.main.asyncAfter(deadline: .now() + duration + interval) {
       if Defaults.motionControlEnabled, self.timelapseState == .waitingInLoop {
         self.timelapseState = .idleInLoop
       }

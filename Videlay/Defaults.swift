@@ -16,7 +16,7 @@ class Defaults {
   static let motionSensitivityKey = "countdown-sounds"
   static let watermarkKey = "watermark-preference"
 
-  static let maxMotionSensitivity = 5
+  static let maxMotionSensitivity: Float = 5.0
   static let delaySeconds = 1.0
   
   static var isFirstLaunch: Bool {
@@ -30,7 +30,7 @@ class Defaults {
     std.set(9.0, forKey: durationControlRowKey)
     std.set(1.0, forKey: intervalControlRowKey)
     std.setValue(false, forKey: motionControlKey)
-    std.set(1, forKey: motionSensitivityKey)
+    std.set(1.0, forKey: motionSensitivityKey)
     std.set(true, forKey: watermarkKey)
   }
   
@@ -46,8 +46,8 @@ class Defaults {
   static var motionControlEnabled: Bool {
     return std.bool(forKey: motionControlKey)
   }
-  static var motionSensitivity: Int {
-    return std.integer(forKey: motionSensitivityKey)
+  static var motionSensitivity: Float {
+    return std.float(forKey: motionSensitivityKey)
   }
   static var watermarkPreference: Bool {
     return std.bool(forKey: watermarkKey)
@@ -62,7 +62,7 @@ class Defaults {
   static func setMotionControl(_ enabled: Bool) {
     std.setValue(enabled, forKey: motionControlKey)
   }
-  static func setMotionSensitivity(_ sensitivity: Int) {
+  static func setMotionSensitivity(_ sensitivity: Float) {
     std.setValue(sensitivity, forKey: motionSensitivityKey)
   }
   static func setWatermarkPreference(_ pref: Bool) {

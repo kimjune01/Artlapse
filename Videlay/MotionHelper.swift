@@ -11,8 +11,10 @@ import Vision
 class MotionHelper {
   let contourRequest = MotionHelper.makeContoursRequest()
   var contourCount = -1
-  var motionSensed: Int = 0
+  var motionSensed: Float = 0
 
+  static var sampleThrottleCounter = 0
+  static let ThrottleCycle = 4
   static func makeContoursRequest() -> VNDetectContoursRequest {
     let req = VNDetectContoursRequest()
     req.revision = VNDetectContourRequestRevision1
@@ -31,7 +33,7 @@ class MotionHelper {
       motionSensed = 0
       return false
     }
-    let motionSensed = Int(log2(Float(diff)))
+    let motionSensed = log2(Float(diff))
     DispatchQueue.main.async {
       self.motionSensed = motionSensed
     }

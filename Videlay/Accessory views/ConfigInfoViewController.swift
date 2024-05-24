@@ -44,13 +44,13 @@ class ConfigInfoViewController: UIViewController {
     refresh()
   }
   
-  func setMotionSense(_ sense: Int) {
+  func setMotionSense(_ sense: Float) {
     var char =  "⚪️"
-    let threshold = 5 - Defaults.motionSensitivity
+    let threshold = 5.0 - Defaults.motionSensitivity
     if sense > threshold {
       char = "🟢"
     }
-    let senseMeter = String(repeating: char, count: sense)
+    let senseMeter = String(repeating: char, count: Int(sense))
     senseLabel.text = "Current motion: " + senseMeter
   }
   
@@ -58,7 +58,7 @@ class ConfigInfoViewController: UIViewController {
     durationLabel.text = "Duration: " + ConfigViewController.configuredDurationText() + "s"
     intervalLabel.text = "Interval: " + ConfigViewController.configuredIntervalText() + "s"
     if Defaults.motionControlEnabled {
-      let senseMeter = String(Defaults.motionSensitivity)
+      let senseMeter = String(format: "%.1f", Defaults.motionSensitivity)
 
       motionLabel.text = "Motion sensitivity: " + senseMeter
       senseLabel.text = "Current motion: unknown"
