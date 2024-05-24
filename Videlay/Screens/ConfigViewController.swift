@@ -95,7 +95,7 @@ class ConfigViewController: UIViewController {
     sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
     sensitivityControlRow.addArrangedSubview(sensitivityControl)
     sensitivityControl.tag = sensitivityControlTag
-    sensitivityControl.text = String(format:".1f",Defaults.motionSensitivity)
+    sensitivityControl.text = String(format:"%.1f", Defaults.motionSensitivity)
     configureNumbered(textfield: sensitivityControl)
     
     let watermarkControlRow = PreferenceRow(labelText: "Artlapse Watermark")

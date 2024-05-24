@@ -42,7 +42,7 @@ class RecordingViewController: UIViewController {
   let controlsContainer = UIView()
   let recordButton = RecordButton(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
   
-  let runloop = ClockRunloop()
+  var resetTimer: Timer!
   let clockOverlay = ClockOverlayView()
   let timerLabel = UILabel()
   
@@ -76,7 +76,6 @@ class RecordingViewController: UIViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     tryStartingRecordingSession()
-    configureRunloop()
   }
   
   override func viewDidAppear(_ animated: Bool) {
@@ -206,14 +205,7 @@ class RecordingViewController: UIViewController {
     addChild(configInfoVC)
     configInfoVC.didMove(toParent: self)
   }
-  
-  func configureRunloop() {
-    let intervalSecs = Defaults.intervalControl
-    let durationSecs = Defaults.durationControl
-    runloop.loopSeconds = intervalSecs + durationSecs
-    runloop.delegate = self
-  }
-  
+    
   func showChatVCWithDialog() {
     let alertController = UIAlertController(title: "Chat with the developer", message: "I would love to know about your experience with Artlapse. Please help make this app better with feedback. I get notifications straight to my iPhone!", preferredStyle: .alert)
     alertController.addAction(UIAlertAction(title: "Chat", style: .default, handler: { _ in
@@ -259,7 +251,7 @@ class RecordingViewController: UIViewController {
     previewConfig.image = UIImage(systemName: "play.rectangle.fill")
 
     previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
-      self.runloop.stop()
+      self.resetTimer.invalidate()
       self.timelapseState = .standby
       self.delegate?.gotoPreview()
     })
@@ -431,9 +423,7 @@ class RecordingViewController: UIViewController {
         timelapseState = .idleInLoop
         // do not start recording until motion is detected.
       } else {
-        runloop.start()
         recordSegment()
-        timelapseState = .activeInLoop
       }
 
     case .activeInLoop:
@@ -448,23 +438,25 @@ class RecordingViewController: UIViewController {
   }
   
   func suspendTimelapse() {
-    runloop.stop()
+    resetTimer.invalidate()
     clockOverlay.cancelAnimations()
     timelapseState = .standby
   }
   
   func recordSegment() {
+    // there's a small delay between record request and record start. disable ui until then
+    view.isUserInteractionEnabled = false
     NextLevel.shared.record()
-    // timing done in delegate method below
+    timelapseState = .activeInLoop
+    // restart timing done in delegate method below
   }
   
   func flipCamera() {
     NextLevel.shared.flipCaptureDevicePosition()
   }
   
-  
-  func reset() {
-    runloop.stop()
+  public func reset() {
+    resetTimer.invalidate()
     timelapseState = .standby
     configInfoVC.refresh()
     if let session = NextLevel.shared.session {
@@ -577,34 +569,31 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
     MotionHelper.sampleThrottleCounter += 1
     guard MotionHelper.sampleThrottleCounter % MotionHelper.ThrottleCycle == 0 else { return }
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-    let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
-    do {
-      try imageRequestHandler.perform([motionHelper.contourRequest])
-      DispatchQueue.main.async {
-        self.configInfoVC.setMotionSense(self.motionHelper.motionSensed)
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+        try imageRequestHandler.perform([self.motionHelper.contourRequest])
+        DispatchQueue.main.async {
+          self.configInfoVC.setMotionSense(self.motionHelper.motionSensed)
+          if self.motionHelper.didSenseMotion, self.timelapseState == .idleInLoop {
+            self.delayThenRecord()
+          }
+        }
+      } catch {
+        print(error)
       }
-      if motionHelper.didSenseMotion {
-        self.delayThenRecord()
-      }
-    } catch {
-      print(error)
     }
   }
   
   func delayThenRecord() {
-    DispatchQueue.main.async {
-      if self.timelapseState == .idleInLoop {
-        self.timelapseState = .delayingInLoop
-        self.clockOverlay.animateYellowCircle(duration: Defaults.delaySeconds)
-        DispatchQueue.main.asyncAfter(deadline: .now() + Defaults.delaySeconds) {
-          if self.timelapseState != .delayingInLoop {
-            // Expect nothing else to change while delaying in loop. UI should be disabled.
-            print("OOPS shouldn't be here!")
-          }
-          self.recordSegment()
-          self.timelapseState = .activeInLoop
-        }
+    timelapseState = .delayingInLoop
+    clockOverlay.animateYellowCircle(duration: Defaults.delaySeconds)
+    DispatchQueue.main.asyncAfter(deadline: .now() + Defaults.delaySeconds) {
+      if self.timelapseState != .delayingInLoop {
+        // Expect nothing else to change while delaying in loop. UI should be disabled.
+        print("OOPS shouldn't be here!")
       }
+      self.recordSegment()
     }
   }
   
@@ -634,6 +623,7 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   }
   
   func nextLevel(_ nextLevel: NextLevel, didStartClipInSession session: NextLevelSession) {
+    view.isUserInteractionEnabled = true
     let duration = TimeInterval(Defaults.durationControl)
     let interval = TimeInterval(Defaults.intervalControl)
     clockOverlay.animateRedCircle(duration: duration)
@@ -642,12 +632,17 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
       self.timelapseState = .waitingInLoop
       self.clockOverlay.animateWhiteCircle(duration: interval)
     }
-    // should be cancelable
-    DispatchQueue.main.asyncAfter(deadline: .now() + duration + interval) {
-      if Defaults.motionControlEnabled, self.timelapseState == .waitingInLoop {
+    
+    let restartSecs = duration + interval
+    resetTimer = Timer(timeInterval: restartSecs, repeats: false, block: { _ in
+      guard self.timelapseState == .waitingInLoop else { return }
+      if Defaults.motionControlEnabled {
         self.timelapseState = .idleInLoop
+      } else {
+        self.recordSegment()
       }
-    }
+    })
+    RunLoop.main.add(resetTimer, forMode: .common)
   }
   
   func nextLevel(_ nextLevel: NextLevel, didCompleteClip clip: NextLevelClip, inSession session: NextLevelSession) {
@@ -687,20 +682,8 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
   
 }
 
-extension RecordingViewController: ClockRunloopDelegate {
-  func clockDidCycleLoop() {
-    if timelapseState == .idleInLoop || timelapseState == .waitingInLoop {
-      timelapseState = .activeInLoop
-      recordSegment()
-    } else {
-      runloop.stop()
-    }
-  }
-}
-
 extension RecordingViewController: ConfigViewControllerDelegate {
   func configVCDidChangeConfig() {
-    configureRunloop()
     renderTimelapseState()
     configInfoVC.refresh()
   }

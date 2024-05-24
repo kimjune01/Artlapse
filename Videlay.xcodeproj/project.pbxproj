@@ -34,7 +34,6 @@
 		0EB4B26628F3BD700036CFFF /* UIView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B25628F3BD700036CFFF /* UIView+.swift */; };
 		0EB4B26728F3BD700036CFFF /* UIViewController+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B25728F3BD700036CFFF /* UIViewController+.swift */; };
 		0EBFA9E228F3E50D007625B4 /* ClockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */; };
-		0EBFA9E428F3E612007625B4 /* ClockRunloop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */; };
 		0EC019ED28EA5EBB000DD2C1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */; };
 		0EC019EF28EA5EBB000DD2C1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */; };
 		0EC019F128EA5EBB000DD2C1 /* RecordingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EC019F028EA5EBB000DD2C1 /* RecordingViewController.swift */; };
@@ -75,7 +74,6 @@
 		0EB4B25628F3BD700036CFFF /* UIView+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+.swift"; sourceTree = "<group>"; };
 		0EB4B25728F3BD700036CFFF /* UIViewController+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIViewController+.swift"; sourceTree = "<group>"; };
 		0EBFA9E128F3E50D007625B4 /* ClockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockOverlayView.swift; sourceTree = "<group>"; };
-		0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockRunloop.swift; sourceTree = "<group>"; };
 		0EC019E928EA5EBB000DD2C1 /* Videlay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Videlay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0EC019EC28EA5EBB000DD2C1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0EC019EE28EA5EBB000DD2C1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -196,7 +194,6 @@
 				0E8686412BF5183A00557C65 /* Sounds */,
 				0E61C1352BF4018700140AAB /* Screens */,
 				0E61C1362BF40A8F00140AAB /* Accessory views */,
-				0EBFA9E328F3E612007625B4 /* ClockRunloop.swift */,
 				0E018FCB2BF96D780095CA15 /* MotionHelper.swift */,
 				0EB4B24728F3BD6A0036CFFF /* Extensions */,
 				0EC019F228EA5EBB000DD2C1 /* Main.storyboard */,
@@ -334,7 +331,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0EBFA9E228F3E50D007625B4 /* ClockOverlayView.swift in Sources */,
-				0EBFA9E428F3E612007625B4 /* ClockRunloop.swift in Sources */,
 				0EC019F128EA5EBB000DD2C1 /* RecordingViewController.swift in Sources */,
 				0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */,
 				0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */,
