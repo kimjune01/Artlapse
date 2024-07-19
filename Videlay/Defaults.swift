@@ -12,12 +12,13 @@ class Defaults {
   // Floats represent seconds
   static let durationControlRowKey = "durationControlRowKey"
   static let intervalControlRowKey = "intervalControlRowKey"
+  static let delayControlRowKey = "delayControlRowKey"
   static let motionControlKey = "motion-enabled"
   static let motionSensitivityKey = "countdown-sounds"
   static let watermarkKey = "watermark-preference"
+  static let flashControlRowKey = "flashControlRowKey"
 
   static let maxMotionSensitivity: Float = 5.0
-  static let delaySeconds = 1.0
   
   static var isFirstLaunch: Bool {
     return !std.bool(forKey: "firstlaunch")
@@ -29,6 +30,8 @@ class Defaults {
   static func setDefaultValues() {
     std.set(9.0, forKey: durationControlRowKey)
     std.set(1.0, forKey: intervalControlRowKey)
+    std.set(2.0, forKey: delayControlRowKey)
+    std.set(true, forKey: flashControlRowKey)
     std.setValue(false, forKey: motionControlKey)
     std.set(1.0, forKey: motionSensitivityKey)
     std.set(true, forKey: watermarkKey)
@@ -40,8 +43,14 @@ class Defaults {
   static var intervalControl: Float {
     return std.float(forKey: intervalControlRowKey)
   }
+  static var delayControl: Float {
+    return std.float(forKey: delayControlRowKey)
+  }
+  static var flashDelayEnabled: Bool {
+    return std.bool(forKey: flashControlRowKey)
+  }
   static var countdownSoundControl: Bool {
-    return std.bool(forKey: "countdown-sounds")
+    return std.bool(forKey: motionSensitivityKey)
   }
   static var motionControlEnabled: Bool {
     return std.bool(forKey: motionControlKey)
@@ -58,6 +67,12 @@ class Defaults {
   }
   static func setIntervalControl(_ number: Float) {
     std.set(number, forKey: intervalControlRowKey)
+  }
+  static func setDelayControl(_ number: Float) {
+    std.set(number, forKey: delayControlRowKey)
+  }
+  static func setFlashControl(_ enabled: Bool) {
+    std.set(enabled, forKey: flashControlRowKey)
   }
   static func setMotionControl(_ enabled: Bool) {
     std.setValue(enabled, forKey: motionControlKey)

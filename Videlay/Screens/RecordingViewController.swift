@@ -585,10 +585,28 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
     }
   }
   
+  func toggleTorch(on: Bool) {
+    guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
+    do {
+      try device.lockForConfiguration()
+      device.torchMode = on ? .on : .off
+      device.unlockForConfiguration()
+    } catch {
+        print("Torch could not be used")
+    }
+  }
+  
   func delayThenRecord() {
     timelapseState = .delayingInLoop
-    clockOverlay.animateYellowCircle(duration: Defaults.delaySeconds)
-    DispatchQueue.main.asyncAfter(deadline: .now() + Defaults.delaySeconds) {
+    let delay = Double(Defaults.delayControl)
+    clockOverlay.animateYellowCircle(duration: delay)
+    if delay >= 1 {
+      toggleTorch(on: true)
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        self.toggleTorch(on: false)
+      }
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
       if self.timelapseState != .delayingInLoop {
         // Expect nothing else to change while delaying in loop. UI should be disabled.
         print("OOPS shouldn't be here!")

@@ -15,10 +15,13 @@ class ConfigViewController: UIViewController {
   let durationControlTag = 0
   let intervalControlTag = 1
   let sensitivityControlTag = 2
+  let delayControlTag = 3
   
   var durationControl: UITextField!
   var intervalControl: UITextField!
-//  var soundSwitch: UISwitch!
+  var delayControl: UITextField!
+
+  var flashSwitch: UISwitch!
   var motionControlSwitch: UISwitch!
   var sensitivityControl: UITextField!
   var watermarkControlSwitch: UISwitch!
@@ -50,6 +53,14 @@ class ConfigViewController: UIViewController {
     chevron.centerXInParent()
   }
   
+  func makeDivider() -> UIView {
+    let div = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+    div.set(width: view.width * 0.8)
+    div.set(height: 1)
+    div.backgroundColor = .lightGray
+    return div
+  }
+  
   func addControlStack() {
     let controlStack = UIStackView()
     controlStack.axis = .vertical
@@ -79,6 +90,37 @@ class ConfigViewController: UIViewController {
     configureNumbered(textfield: intervalControl)
     intervalControl.text = String(format:"%.0f",Defaults.intervalControl)
 
+    let divider1 = makeDivider()
+    controlStack.addArrangedSubview(divider1)
+
+    let delaySettingsLabel = PreferenceRow(labelText: "Delay Settings")
+    controlStack.addArrangedSubview(delaySettingsLabel)
+
+    let delayControlRow = PreferenceRow(labelText: "Seconds before capture")
+    controlStack.addArrangedSubview(delayControlRow)
+    delayControlRow.set(width: view.width - 24)
+    controlStack.addArrangedSubview(delayControlRow)
+
+    delayControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+    delayControlRow.addArrangedSubview(delayControl)
+    delayControl.tag = delayControlTag
+    configureNumbered(textfield: delayControl)
+    delayControl.text = String(format: "%d", Defaults.delayControl)
+    
+    let flashControlRow = PreferenceRow(labelText: "Flash when about to film")
+    controlStack.addArrangedSubview(flashControlRow)
+    
+    flashSwitch = UISwitch()
+    flashSwitch.isOn = Defaults.flashDelayEnabled
+    flashControlRow.addArrangedSubview(flashSwitch)
+    flashSwitch.addTarget(self, action: #selector(flashSwitchDidToggle), for: .valueChanged)
+
+    let divider2 = makeDivider()
+    controlStack.addArrangedSubview(divider2)
+
+    let advancedSettingsLabel = PreferenceRow(labelText: "Motion Settings")
+    controlStack.addArrangedSubview(advancedSettingsLabel)
+
     let motionControlRow = PreferenceRow(labelText: "Motion control")
     controlStack.addArrangedSubview(motionControlRow)
     motionControlRow.set(width: view.width - 24)
@@ -92,12 +134,16 @@ class ConfigViewController: UIViewController {
     controlStack.addArrangedSubview(sensitivityControlRow)
     sensitivityControlRow.set(width: view.width - 24)
     
-    sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+    sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 180, height: 50))
     sensitivityControlRow.addArrangedSubview(sensitivityControl)
     sensitivityControl.tag = sensitivityControlTag
     sensitivityControl.text = String(format:"%.1f", Defaults.motionSensitivity)
     configureNumbered(textfield: sensitivityControl)
     
+    let divider3 = makeDivider()
+    controlStack.addArrangedSubview(divider3)
+
+
     let watermarkControlRow = PreferenceRow(labelText: "Artlapse Watermark")
     controlStack.addArrangedSubview(watermarkControlRow)
     watermarkControlRow.set(width: view.width - 24)
@@ -118,7 +164,13 @@ class ConfigViewController: UIViewController {
     textfield.layer.cornerRadius = 8
     textfield.delegate = self
   }
-  
+  @objc func flashSwitchDidToggle(sw: UISwitch) {
+    Defaults.setFlashControl(sw.isOn)
+    if (sw.isOn) {
+      showAlert("Flash will turn on shortly before recording.")
+    }
+    delegate?.configVCDidChangeConfig()
+  }
   @objc func motionSwitchDidToggle(sw: UISwitch) {
     Defaults.setMotionControl(sw.isOn)
     if (sw.isOn) {
@@ -185,6 +237,10 @@ class ConfigViewController: UIViewController {
     Defaults.setMotionSensitivity(number)
   }
   
+  func setDelay(_ number: Float) {
+    Defaults.setDelayControl(number)
+  }
+  
   func showAlert(_ message: String) {
     let alert = UIAlertController(title: "Attention", message: message, preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK", style: .default) { _ in
@@ -219,6 +275,8 @@ extension ConfigViewController: UITextFieldDelegate {
       setInterval(number)
     case sensitivityControlTag:
       setMotionSensitivity(number)
+    case delayControlTag:
+      setDelay(number)
     default:
       assert(false)
     }
