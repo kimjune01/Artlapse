@@ -1,7 +1,7 @@
 PODS:
-  - Crisp (2.4.5):
-    - Crisp/Crisp (= 2.4.5)
-  - Crisp/Crisp (2.4.5)
+  - Crisp (2.5.4):
+    - Crisp/Crisp (= 2.5.4)
+  - Crisp/Crisp (2.5.4)
   - MediaWatermark (0.4.0)
   - NextLevel (0.18.0)
   - Player (0.14.0)
@@ -20,11 +20,11 @@ SPEC REPOS:
     - Player
 
 SPEC CHECKSUMS:
-  Crisp: 64ad3a599e20dbc8cd570e44ccd9aa904f65ddcb
+  Crisp: 9b5980dc626f0aabfa9aeecdeda14cb1fb9cbb37
   MediaWatermark: d67db91deaaa9403220899adfb59c80221a02a7d
   NextLevel: ad582ac2d9c757fe285f9b53ede1f593c50a22e8
   Player: 37e0acc16ea1495fc241df88fe9f089367513331
 
 PODFILE CHECKSUM: 1f69b79514c45872f1458a772f8b340ddf14ad06
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
