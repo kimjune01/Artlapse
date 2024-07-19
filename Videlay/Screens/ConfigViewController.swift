@@ -105,7 +105,7 @@ class ConfigViewController: UIViewController {
     delayControlRow.addArrangedSubview(delayControl)
     delayControl.tag = delayControlTag
     configureNumbered(textfield: delayControl)
-    delayControl.text = String(format: "%d", Defaults.delayControl)
+    delayControl.text = String(format: "%.0f", Defaults.delayControl)
     
     let flashControlRow = PreferenceRow(labelText: "Flash when about to film")
     controlStack.addArrangedSubview(flashControlRow)
@@ -238,7 +238,8 @@ class ConfigViewController: UIViewController {
   }
   
   func setDelay(_ number: Float) {
-    Defaults.setDelayControl(number)
+    Defaults.setDelayControl(roundf(number))
+    delayControl.text = String(format:"%d", Int(roundf(number)))
   }
   
   func showAlert(_ message: String) {
@@ -277,6 +278,9 @@ extension ConfigViewController: UITextFieldDelegate {
       setMotionSensitivity(number)
     case delayControlTag:
       setDelay(number)
+      if number != floor(number) {
+        showAlert("Rounded to a whole number")
+      }
     default:
       assert(false)
     }
