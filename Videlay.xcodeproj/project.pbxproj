@@ -10,12 +10,12 @@
 		0E018FCC2BF96D780095CA15 /* MotionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCB2BF96D780095CA15 /* MotionHelper.swift */; };
 		0E018FCE2BFAB2A20095CA15 /* Watermarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCD2BFAB2A20095CA15 /* Watermarker.swift */; };
 		0E018FD02BFABDC90095CA15 /* PreferenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E018FCF2BFABDC90095CA15 /* PreferenceRow.swift */; };
+		0E20CA1D2C4D8A8C005B662E /* Sound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E20CA1C2C4D8A8C005B662E /* Sound.swift */; };
 		0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */; };
 		0E61C1342BF3FE3500140AAB /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */; };
 		0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E61C1372BF40AAB00140AAB /* CircleView.swift */; };
 		0E8686432BF5184500557C65 /* bip.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0E8686422BF5184500557C65 /* bip.wav */; };
 		0E8686452BF5185200557C65 /* boop.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0E8686442BF5185200557C65 /* boop.wav */; };
-		0E8686472BF5187900557C65 /* BipBoopPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8686462BF5187900557C65 /* BipBoopPlayer.swift */; };
 		0E8686492BF51D5F00557C65 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8686482BF51D5F00557C65 /* Defaults.swift */; };
 		0EB4B25828F3BD700036CFFF /* UIScrollView+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */; };
 		0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EB4B24928F3BD700036CFFF /* UUID+.swift */; };
@@ -50,12 +50,12 @@
 		0E018FCB2BF96D780095CA15 /* MotionHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionHelper.swift; sourceTree = "<group>"; };
 		0E018FCD2BFAB2A20095CA15 /* Watermarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Watermarker.swift; sourceTree = "<group>"; };
 		0E018FCF2BFABDC90095CA15 /* PreferenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferenceRow.swift; sourceTree = "<group>"; };
+		0E20CA1C2C4D8A8C005B662E /* Sound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sound.swift; sourceTree = "<group>"; };
 		0E501B4D2BF3E973008EA6B1 /* ExportPreviewViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExportPreviewViewController.swift; sourceTree = "<group>"; };
 		0E61C1332BF3FE3500140AAB /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		0E61C1372BF40AAB00140AAB /* CircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
 		0E8686422BF5184500557C65 /* bip.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bip.wav; sourceTree = "<group>"; };
 		0E8686442BF5185200557C65 /* boop.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = boop.wav; sourceTree = "<group>"; };
-		0E8686462BF5187900557C65 /* BipBoopPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BipBoopPlayer.swift; sourceTree = "<group>"; };
 		0E8686482BF51D5F00557C65 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 		0EB4B24828F3BD700036CFFF /* UIScrollView+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIScrollView+.swift"; sourceTree = "<group>"; };
 		0EB4B24928F3BD700036CFFF /* UUID+.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UUID+.swift"; sourceTree = "<group>"; };
@@ -137,7 +137,7 @@
 		0E8686412BF5183A00557C65 /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
-				0E8686462BF5187900557C65 /* BipBoopPlayer.swift */,
+				0E20CA1C2C4D8A8C005B662E /* Sound.swift */,
 				0E8686442BF5185200557C65 /* boop.wav */,
 				0E8686422BF5184500557C65 /* bip.wav */,
 			);
@@ -336,7 +336,6 @@
 				0EB4B25928F3BD700036CFFF /* UUID+.swift in Sources */,
 				0E018FD02BFABDC90095CA15 /* PreferenceRow.swift in Sources */,
 				0EB4B26028F3BD700036CFFF /* FileManager+.swift in Sources */,
-				0E8686472BF5187900557C65 /* BipBoopPlayer.swift in Sources */,
 				0EEADD8F28F3BE5A004F7BE5 /* RecordButton.swift in Sources */,
 				0EB4B25A28F3BD700036CFFF /* Date+.swift in Sources */,
 				0E61C1382BF40AAB00140AAB /* CircleView.swift in Sources */,
@@ -345,6 +344,7 @@
 				0ED7299A2BF4192100AA6908 /* ConfigInfoViewController.swift in Sources */,
 				0EB4B25F28F3BD700036CFFF /* TimeInterval+.swift in Sources */,
 				0EB4B26328F3BD700036CFFF /* String+.swift in Sources */,
+				0E20CA1D2C4D8A8C005B662E /* Sound.swift in Sources */,
 				0E018FCE2BFAB2A20095CA15 /* Watermarker.swift in Sources */,
 				0EB4B26428F3BD700036CFFF /* UIFont+.swift in Sources */,
 				0E501B4E2BF3E973008EA6B1 /* ExportPreviewViewController.swift in Sources */,

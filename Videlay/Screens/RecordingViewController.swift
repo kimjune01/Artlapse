@@ -251,7 +251,7 @@ class RecordingViewController: UIViewController {
     previewConfig.image = UIImage(systemName: "play.rectangle.fill")
 
     previewButton = UIButton(configuration: previewConfig, primaryAction: UIAction() { _ in
-      self.resetTimer.invalidate()
+      self.resetTimer?.invalidate()
       self.timelapseState = .standby
       self.delegate?.gotoPreview()
     })
@@ -438,7 +438,7 @@ class RecordingViewController: UIViewController {
   }
   
   func suspendTimelapse() {
-    resetTimer.invalidate()
+    resetTimer?.invalidate()
     clockOverlay.cancelAnimations()
     timelapseState = .standby
   }
@@ -456,7 +456,7 @@ class RecordingViewController: UIViewController {
   }
   
   public func reset() {
-    resetTimer.invalidate()
+    resetTimer?.invalidate()
     timelapseState = .standby
     configInfoVC.refresh()
     if let session = NextLevel.shared.session {
@@ -606,6 +606,7 @@ extension RecordingViewController: NextLevelDelegate, NextLevelDeviceDelegate, N
         self.toggleTorch(on: false)
       }
     }
+    Sound.play(file: "boop.wav")
     DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
       if self.timelapseState != .delayingInLoop {
         // Expect nothing else to change while delaying in loop. UI should be disabled.

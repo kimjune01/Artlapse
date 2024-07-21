@@ -170,6 +170,7 @@ class ConfigViewController: UIViewController {
       showAlert("Flash will turn on shortly before recording.")
     }
     delegate?.configVCDidChangeConfig()
+    Sound.play(file: "boop.wav")
   }
   @objc func motionSwitchDidToggle(sw: UISwitch) {
     Defaults.setMotionControl(sw.isOn)
