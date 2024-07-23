@@ -11,7 +11,9 @@ enum ConfigType: Int {
 }
 
 class ConfigViewController: UIViewController {
-  
+  let chevron = UIImageView(image: UIImage(systemName: "chevron.down")!)
+  let scrollView = UIScrollView()
+
   let durationControlTag = 0
   let intervalControlTag = 1
   let sensitivityControlTag = 2
@@ -25,7 +27,6 @@ class ConfigViewController: UIViewController {
   var motionControlSwitch: UISwitch!
   var sensitivityControl: UITextField!
   var watermarkControlSwitch: UISwitch!
-  
 
   weak var delegate: ConfigViewControllerDelegate?
 
@@ -35,6 +36,13 @@ class ConfigViewController: UIViewController {
     addChevron()
     addControlStack()
     addTapTarget()
+  }
+  
+  override func viewDidAppear(_ animated: Bool) {
+    let contentRect: CGRect = scrollView.subviews.reduce(into: .zero) { rect, view in
+        rect = rect.union(view.frame)
+    }
+    scrollView.contentSize = contentRect.size
   }
   
   func addTapTarget() {
@@ -47,10 +55,16 @@ class ConfigViewController: UIViewController {
   }
   
   func addChevron() {
-    let chevron = UIImageView(image: UIImage(systemName: "chevron.down")!)
     view.addSubview(chevron)
     chevron.pinTopToParent(margin: 8, insideSafeArea: true)
     chevron.centerXInParent()
+    chevron.isUserInteractionEnabled = true
+    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapChevron))
+    chevron.addGestureRecognizer(tapRecognizer)
+  }
+  
+  @objc func didTapChevron() {
+    dismiss(animated: true)
   }
   
   func makeDivider() -> UIView {
@@ -62,17 +76,21 @@ class ConfigViewController: UIViewController {
   }
   
   func addControlStack() {
+    view.addSubview(scrollView)
+    scrollView.pinTop(toBottomOf: chevron)
+    scrollView.fillWidthOfParent()
+    scrollView.pinBottomToParent()
+
     let controlStack = UIStackView()
     controlStack.axis = .vertical
     controlStack.alignment = .center
     controlStack.spacing = 18
-    view.addSubview(controlStack)
+    scrollView.addSubview(controlStack)
     controlStack.centerXInParent()
-    controlStack.setTopToParent(margin: 50)
     
     let durationControlRow = PreferenceRow(labelText: "Record duration (seconds)")
     controlStack.addArrangedSubview(durationControlRow)
-    durationControlRow.set(width: view.width - 24)
+    durationControlRow.set(width: view.width - 32)
 
     durationControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
     durationControlRow.addArrangedSubview(durationControl)
@@ -82,7 +100,7 @@ class ConfigViewController: UIViewController {
     
     let intervalControlRow = PreferenceRow(labelText: "Interval between (seconds)")
     controlStack.addArrangedSubview(intervalControlRow)
-    intervalControlRow.set(width: view.width - 24)
+    intervalControlRow.set(width: view.width - 32)
 
     intervalControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
     intervalControlRow.addArrangedSubview(intervalControl)
@@ -98,7 +116,7 @@ class ConfigViewController: UIViewController {
 
     let delayControlRow = PreferenceRow(labelText: "Seconds before capture")
     controlStack.addArrangedSubview(delayControlRow)
-    delayControlRow.set(width: view.width - 24)
+    delayControlRow.set(width: view.width - 32)
     controlStack.addArrangedSubview(delayControlRow)
 
     delayControl = UITextField(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
@@ -108,6 +126,7 @@ class ConfigViewController: UIViewController {
     delayControl.text = String(format: "%.0f", Defaults.delayControl)
     
     let flashControlRow = PreferenceRow(labelText: "Flash when about to film")
+    flashControlRow.set(width: view.width - 32)
     controlStack.addArrangedSubview(flashControlRow)
     
     flashSwitch = UISwitch()
@@ -123,7 +142,7 @@ class ConfigViewController: UIViewController {
 
     let motionControlRow = PreferenceRow(labelText: "Motion control")
     controlStack.addArrangedSubview(motionControlRow)
-    motionControlRow.set(width: view.width - 24)
+    motionControlRow.set(width: view.width - 32)
     
     motionControlSwitch = UISwitch()
     motionControlSwitch.isOn = Defaults.motionControlEnabled
@@ -132,7 +151,7 @@ class ConfigViewController: UIViewController {
     
     let sensitivityControlRow = PreferenceRow(labelText: "Motion sensitivity (1 - 5)")
     controlStack.addArrangedSubview(sensitivityControlRow)
-    sensitivityControlRow.set(width: view.width - 24)
+    sensitivityControlRow.set(width: view.width - 32)
     
     sensitivityControl = UITextField(frame: CGRect(x: 0, y: 0, width: 180, height: 50))
     sensitivityControlRow.addArrangedSubview(sensitivityControl)
@@ -143,10 +162,9 @@ class ConfigViewController: UIViewController {
     let divider3 = makeDivider()
     controlStack.addArrangedSubview(divider3)
 
-
     let watermarkControlRow = PreferenceRow(labelText: "Artlapse Watermark")
     controlStack.addArrangedSubview(watermarkControlRow)
-    watermarkControlRow.set(width: view.width - 24)
+    watermarkControlRow.set(width: view.width - 32)
     
     watermarkControlSwitch = UISwitch()
     watermarkControlSwitch.isOn = Defaults.watermarkPreference
@@ -286,5 +304,39 @@ extension ConfigViewController: UITextFieldDelegate {
       assert(false)
     }
     delegate?.configVCDidChangeConfig()
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+      registerKeyboardNotifications()
+  }
+
+  func registerKeyboardNotifications() {
+      NotificationCenter.default.addObserver(self,
+                                           selector: #selector(keyboardWillShow(notification:)),
+                                           name: UIResponder.keyboardWillShowNotification,
+                                           object: nil)
+      NotificationCenter.default.addObserver(self,
+                                           selector: #selector(keyboardWillHide(notification:)),
+                                           name: UIResponder.keyboardWillHideNotification,
+                                           object: nil)
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+      super.viewWillDisappear(animated)
+      NotificationCenter.default.removeObserver(self)
+  }
+
+  @objc func keyboardWillShow(notification: NSNotification) {
+    guard let userInfo = notification.userInfo,
+          let keyboardSize = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+    let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height, right: 0)
+    scrollView.contentInset = contentInsets
+    scrollView.scrollIndicatorInsets = contentInsets
+  }
+
+  @objc func keyboardWillHide(notification: NSNotification) {
+      scrollView.contentInset = .zero
+      scrollView.scrollIndicatorInsets = .zero
   }
 }

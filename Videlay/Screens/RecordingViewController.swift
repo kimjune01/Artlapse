@@ -218,6 +218,7 @@ class RecordingViewController: UIViewController {
   func showConfigVC() {
     let configVC = ConfigViewController()
     configVC.delegate = self
+//    configVC.modalPresentationStyle = .fullScreen
     present(configVC, animated: true)
   }
 
